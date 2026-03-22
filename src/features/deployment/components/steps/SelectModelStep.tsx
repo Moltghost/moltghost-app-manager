@@ -62,9 +62,9 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
   }, []);
 
   return (
-    <div className="flex flex-col items-center gap-8 px-8 py-10">
+    <div className="flex flex-col items-center gap-6 sm:gap-8 px-4 py-8 sm:px-8 sm:py-10">
       {/* Header */}
-      <div className="text-center flex flex-col gap-2">
+      <div className="text-center flex flex-col gap-2 pt-8 sm:pt-0">
         <h2 className="text-2xl font-semibold text-white tracking-tight">
           Deploy Your AI Agent
         </h2>
@@ -78,11 +78,11 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
       {loading ? (
         <p className="text-sm text-white/30 animate-pulse">Loading models…</p>
       ) : (
-        <div className="grid grid-cols-3 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
           {models.map((model) => (
             <GlassCard
               key={model.id}
-              className="rounded-3xl! flex flex-col gap-5 p-6"
+              className="rounded-3xl! flex flex-col gap-4 p-6"
             >
               {/* Label + recommended badge */}
               <div className="flex items-start justify-between gap-2">

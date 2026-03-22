@@ -8,7 +8,7 @@ interface WelcomeStepProps {
 
 export function WelcomeStep({ onNext }: WelcomeStepProps) {
   return (
-    <div className="flex flex-col items-center text-center px-10 py-10 gap-5">
+    <div className="flex flex-col items-center text-center px-6 py-8 sm:px-10 sm:py-10 gap-5">
       <h1 className="text-2xl font-semibold text-white/88 tracking-tight">
         Hello, Welcome!
       </h1>

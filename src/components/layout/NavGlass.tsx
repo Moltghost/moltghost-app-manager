@@ -22,7 +22,7 @@ const NavGlass = ({ selected, onTabChange }: NavGlassProps) => {
   return (
     <>
       <fieldset
-        className="switcher"
+        className="switcher z-30 overflow-hidden"
         data-c-previous={previous}
         data-selected={selected}
       >

@@ -44,25 +44,25 @@ export interface AgentSettings {
 }
 
 export const DEFAULT_AGENT_SETTINGS: AgentSettings = {
-  skills: [],
+  skills: ["solana_private_transaction", "brave_search", "file_system_access"],
   memory: {
-    enablePrivateMemory: false,
-    persistentMemory: false,
-    encryption: false,
+    enablePrivateMemory: true,
+    persistentMemory: true,
+    encryption: true,
   },
   agentBehavior: {
-    autonomousMode: false,
+    autonomousMode: true,
     taskTimeout: 30,
     maxConcurrentTasks: 3,
   },
   notifications: {
-    webhookNotifications: false,
+    webhookNotifications: true,
     emailAlerts: false,
-    taskReports: false,
+    taskReports: true,
   },
   autoSleep: {
-    enableAutoSleep: false,
-    idleTimeout: 15,
+    enableAutoSleep: true,
+    idleTimeout: 5,
   },
 };
 

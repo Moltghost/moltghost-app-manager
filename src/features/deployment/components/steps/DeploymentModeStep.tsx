@@ -79,9 +79,9 @@ function StarRating({ count }: { count: number }) {
 
 export function DeploymentModeStep({ onNext }: DeploymentModeStepProps) {
   return (
-    <div className="flex flex-col items-center gap-8 px-8 py-10">
+    <div className="flex flex-col items-center gap-6 sm:gap-8 px-4 py-8 sm:px-8 sm:py-10">
       {/* Header */}
-      <div className="text-center flex flex-col gap-2">
+      <div className="text-center flex flex-col gap-2 pt-8 sm:pt-0">
         <h2 className="text-2xl font-semibold text-white tracking-tight">
           Choose How to Run Your Agent
         </h2>
@@ -91,21 +91,21 @@ export function DeploymentModeStep({ onNext }: DeploymentModeStepProps) {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-3 gap-4 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
         {MODES.map((mode) => {
           const disabled = DISABLED_MODES.includes(mode.id);
           return (
             <GlassCard
               key={mode.id}
               className={[
-                "rounded-3xl! flex flex-col p-6 gap-8",
+                "rounded-3xl! flex flex-col p-6 gap-4",
                 disabled
                   ? "opacity-50 grayscale pointer-events-none select-none"
                   : "",
               ].join(" ")}
             >
               {/* Title + Description */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 h-25">
                 <h3 className="text-base font-semibold text-white/90 leading-snug whitespace-pre-line">
                   {mode.title}
                 </h3>
@@ -115,7 +115,7 @@ export function DeploymentModeStep({ onNext }: DeploymentModeStepProps) {
               </div>
 
               {/* Badge */}
-              <div className="relative w-full h-12.5 my-4">
+              <div className="relative w-full my-8">
                 <span className="absolute top-0 bottom-0 my-auto left-0 right-0 w-full h-px bg-white/50"></span>
                 <Button
                   variant="primary"

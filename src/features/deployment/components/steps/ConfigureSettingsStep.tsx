@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Switch } from "@/components/ui/Switch";
+import { GlassCard } from "@/components/ui/GlassCard";
 import {
   DEFAULT_AGENT_SETTINGS,
   type AgentSettings,
@@ -8,37 +10,6 @@ import {
 
 interface ConfigureSettingsStepProps {
   onNext: (settings: AgentSettings) => void;
-}
-
-function Toggle({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <button
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={[
-        "relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0",
-        "focus:outline-none",
-        checked
-          ? "bg-white/40 [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.35)]"
-          : "bg-white/10 [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.12)]",
-      ].join(" ")}
-    >
-      <span
-        className={[
-          "absolute top-0.5 w-4 h-4 rounded-full transition-transform duration-200",
-          "bg-white/80 shadow-sm",
-          checked ? "translate-x-4" : "translate-x-0.5",
-        ].join(" ")}
-      />
-    </button>
-  );
 }
 
 function NumberInput({
@@ -73,14 +44,14 @@ function SectionHeader({
   subtitle: string;
 }) {
   return (
-    <div className="flex flex-col gap-0.5 mb-3">
-      <h3 className="text-sm font-semibold text-white/80">{title}</h3>
-      <p className="text-xs text-white/35">{subtitle}</p>
+    <div className="flex flex-col gap-1 mb-4">
+      <h3 className="text-sm font-semibold text-white/90">{title}</h3>
+      <p className="text-xs text-white/40">{subtitle}</p>
     </div>
   );
 }
 
-function SettingRow({
+function SettingCard({
   label,
   desc,
   right,
@@ -90,31 +61,31 @@ function SettingRow({
   right: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2.5 border-b border-white/5 last:border-0">
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <span className="text-xs font-medium text-white/70">{label}</span>
-        <span className="text-[11px] text-white/35 leading-snug">{desc}</span>
+    <GlassCard className="flex flex-col justify-between gap-3 !rounded-2xl px-4 py-4 min-h-[110px]">
+      <div className="flex flex-col gap-1.5 flex-1">
+        <span className="text-xs font-semibold text-white/80">{label}</span>
+        <span className="text-[11px] text-white/40 leading-snug">{desc}</span>
       </div>
-      <div className="shrink-0">{right}</div>
-    </div>
+      <div className="flex justify-end">{right}</div>
+    </GlassCard>
   );
 }
 
 const SKILL_OPTIONS = [
   {
-    id: "brave_private_transaction",
-    label: "Brave Private Transaction",
-    desc: "Execute secure and private transactions in the Brave browser.",
+    id: "solana_private_transaction",
+    label: "Solana Private Transaction",
+    desc: "Allow the agent to securely sign and send private transactions on the Solana network.",
   },
   {
     id: "brave_search",
     label: "Brave Search",
-    desc: "Search the web and retrieve the latest information.",
+    desc: "Allow the agent to access real-time web search results using the Brave Search API.",
   },
   {
     id: "file_system_access",
     label: "File System Access",
-    desc: "Read/write files on the local file system.",
+    desc: "Allow the agent to read and write files within its the add runtime environment.",
   },
 ];
 
@@ -173,9 +144,9 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 px-8 py-10 w-full">
+    <div className="flex flex-col items-center gap-6 px-4 py-8 sm:px-8 sm:py-10 w-full">
       {/* Header */}
-      <div className="text-center flex flex-col gap-2">
+      <div className="text-center flex flex-col gap-2 pt-8 sm:pt-0">
         <h2 className="text-2xl font-semibold text-white tracking-tight">
           Configure Agent Settings
         </h2>
@@ -185,174 +156,184 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
         </p>
       </div>
 
-      <div className="w-full flex flex-col gap-6">
+      <div className="w-full flex flex-col gap-10">
         {/* Skills */}
         <div>
           <SectionHeader
             title="Skills"
             subtitle="Enable capabilities that allow your agent to interact with tools, services, and external systems."
           />
-          {SKILL_OPTIONS.map((skill) => (
-            <SettingRow
-              key={skill.id}
-              label={skill.label}
-              desc={skill.desc}
-              right={
-                <Toggle
-                  checked={settings.skills.includes(skill.id)}
-                  onChange={() => toggleSkill(skill.id)}
-                />
-              }
-            />
-          ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {SKILL_OPTIONS.map((skill) => (
+              <SettingCard
+                key={skill.id}
+                label={skill.label}
+                desc={skill.desc}
+                right={
+                  <Switch
+                    checked={settings.skills.includes(skill.id)}
+                    onChange={() => toggleSkill(skill.id)}
+                  />
+                }
+              />
+            ))}
+          </div>
         </div>
 
         {/* Private Memory */}
         <div>
           <SectionHeader
             title="Private Memory"
-            subtitle="Configure how your agent stores and recalls information using ultra-private storage."
+            subtitle="Allow your agent to securely store and recall information across sessions using encrypted storage."
           />
-          <SettingRow
-            label="Enable Private Memory"
-            desc="Allow your agent to save and recall information across agent interactions."
-            right={
-              <Toggle
-                checked={settings.memory.enablePrivateMemory}
-                onChange={(v) => setMemory("enablePrivateMemory", v)}
-              />
-            }
-          />
-          <SettingRow
-            label="Persistent Memory"
-            desc="Retain the agent's memories and key information until the agent is stopped."
-            right={
-              <Toggle
-                checked={settings.memory.persistentMemory}
-                onChange={(v) => setMemory("persistentMemory", v)}
-              />
-            }
-          />
-          <SettingRow
-            label="Encryption"
-            desc="Encrypts to ensure private memory to protect all data."
-            right={
-              <Toggle
-                checked={settings.memory.encryption}
-                onChange={(v) => setMemory("encryption", v)}
-              />
-            }
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SettingCard
+              label="Enable Private Memory"
+              desc="Allow your agent to securely store and recall information across sessions using encrypted storage."
+              right={
+                <Switch
+                  checked={settings.memory.enablePrivateMemory}
+                  onChange={(v) => setMemory("enablePrivateMemory", v)}
+                />
+              }
+            />
+            <SettingCard
+              label="Persistent Memory"
+              desc="Keep memory stored permanently so the agent can recall it after restarts."
+              right={
+                <Switch
+                  checked={settings.memory.persistentMemory}
+                  onChange={(v) => setMemory("persistentMemory", v)}
+                />
+              }
+            />
+            <SettingCard
+              label="Encryption"
+              desc="All memory is encrypted to ensure privacy and secure storage."
+              right={
+                <Switch
+                  checked={settings.memory.encryption}
+                  onChange={(v) => setMemory("encryption", v)}
+                />
+              }
+            />
+          </div>
         </div>
 
         {/* Agent Behavior */}
         <div>
           <SectionHeader
             title="Agent Behavior"
-            subtitle="Control how the agent executes tasks and makes decisions on long runtimes."
+            subtitle="Control how the agent executes tasks and responds during runtime."
           />
-          <SettingRow
-            label="Autonomous Mode"
-            desc="Allow the agent to take actions and execute tasks automatically."
-            right={
-              <Toggle
-                checked={settings.agentBehavior.autonomousMode}
-                onChange={(v) => setBehavior("autonomousMode", v)}
-              />
-            }
-          />
-          <SettingRow
-            label="Task Timeout"
-            desc="Automatically cancel a task on the agent if it has not been completed in time."
-            right={
-              <div className="flex items-center gap-1.5">
-                <NumberInput
-                  value={settings.agentBehavior.taskTimeout}
-                  onChange={(v) => setBehavior("taskTimeout", v)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SettingCard
+              label="Autonomous Mode"
+              desc="Allow the agent to execute tasks automatically without manual approval."
+              right={
+                <Switch
+                  checked={settings.agentBehavior.autonomousMode}
+                  onChange={(v) => setBehavior("autonomousMode", v)}
                 />
-                <span className="text-xs text-white/30">sec</span>
-              </div>
-            }
-          />
-          <SettingRow
-            label="Max Concurrent Tasks"
-            desc="Limit the number of active tasks that can run on the agent at the same time."
-            right={
-              <NumberInput
-                value={settings.agentBehavior.maxConcurrentTasks}
-                onChange={(v) => setBehavior("maxConcurrentTasks", v)}
-              />
-            }
-          />
+              }
+            />
+            <SettingCard
+              label="Task Timeout"
+              desc="Set the maximum time a task can run before it is stopped."
+              right={
+                <div className="flex items-center gap-1.5">
+                  <NumberInput
+                    value={settings.agentBehavior.taskTimeout}
+                    onChange={(v) => setBehavior("taskTimeout", v)}
+                  />
+                  <span className="text-xs text-white/30">sec</span>
+                </div>
+              }
+            />
+            <SettingCard
+              label="Max Concurrent Tasks"
+              desc="Limit how many tasks the agent can process at the same time."
+              right={
+                <NumberInput
+                  value={settings.agentBehavior.maxConcurrentTasks}
+                  onChange={(v) => setBehavior("maxConcurrentTasks", v)}
+                />
+              }
+            />
+          </div>
         </div>
 
         {/* Notification */}
         <div>
           <SectionHeader
             title="Notification"
-            subtitle="Configure how your agent sends updates and alerts about task status and completions."
+            subtitle="Configure how your agent sends updates and alerts when tasks run or complete."
           />
-          <SettingRow
-            label="Webhook Notifications"
-            desc="Send your agent updates and alerts to a configured webhook URL endpoint."
-            right={
-              <Toggle
-                checked={settings.notifications.webhookNotifications}
-                onChange={(v) => setNotifications("webhookNotifications", v)}
-              />
-            }
-          />
-          <SettingRow
-            label="Email Alerts"
-            desc="Receive email notifications when your agent completes, encounters a critical error."
-            right={
-              <Toggle
-                checked={settings.notifications.emailAlerts}
-                onChange={(v) => setNotifications("emailAlerts", v)}
-              />
-            }
-          />
-          <SettingRow
-            label="Task Reports"
-            desc="Schedule a schedule a periodic report for any task completed to a destination output."
-            right={
-              <Toggle
-                checked={settings.notifications.taskReports}
-                onChange={(v) => setNotifications("taskReports", v)}
-              />
-            }
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SettingCard
+              label="Webhook Notifications"
+              desc="Send task updates to an external service using a webhook endpoint."
+              right={
+                <Switch
+                  checked={settings.notifications.webhookNotifications}
+                  onChange={(v) => setNotifications("webhookNotifications", v)}
+                />
+              }
+            />
+            <SettingCard
+              label="Email Alerts"
+              desc="Receive email notifications when tasks complete or encounter errors."
+              right={
+                <Switch
+                  checked={settings.notifications.emailAlerts}
+                  onChange={(v) => setNotifications("emailAlerts", v)}
+                />
+              }
+            />
+            <SettingCard
+              label="Task Reports"
+              desc="Generate summary reports for completed tasks and activities."
+              right={
+                <Switch
+                  checked={settings.notifications.taskReports}
+                  onChange={(v) => setNotifications("taskReports", v)}
+                />
+              }
+            />
+          </div>
         </div>
 
         {/* Auto Sleep */}
         <div>
           <SectionHeader
             title="Auto Sleep"
-            subtitle="Configure the SPS while the agent is idle on less active ops."
+            subtitle="Automatically sleep the GPU when the agent is idle to reduce cost."
           />
-          <SettingRow
-            label="Enable Auto Sleep"
-            desc="Put the agent to sleep to preserve agent clock time."
-            right={
-              <Toggle
-                checked={settings.autoSleep.enableAutoSleep}
-                onChange={(v) => setAutoSleep("enableAutoSleep", v)}
-              />
-            }
-          />
-          <SettingRow
-            label="Idle Timeout"
-            desc="The agent will automatically sleep after the specified idle time has elapsed."
-            right={
-              <div className="flex items-center gap-1.5">
-                <NumberInput
-                  value={settings.autoSleep.idleTimeout}
-                  onChange={(v) => setAutoSleep("idleTimeout", v)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SettingCard
+              label="Enable Auto Sleep"
+              desc="Sleep the GPU when the agent is idle to save cost."
+              right={
+                <Switch
+                  checked={settings.autoSleep.enableAutoSleep}
+                  onChange={(v) => setAutoSleep("enableAutoSleep", v)}
                 />
-                <span className="text-xs text-white/30">min</span>
-              </div>
-            }
-          />
+              }
+            />
+            <SettingCard
+              label="Idle Timeout"
+              desc="Set how long the agent must be idle before the GPU sleeps."
+              right={
+                <div className="flex items-center gap-1.5">
+                  <NumberInput
+                    value={settings.autoSleep.idleTimeout}
+                    onChange={(v) => setAutoSleep("idleTimeout", v)}
+                  />
+                  <span className="text-xs text-white/30">min</span>
+                </div>
+              }
+            />
+          </div>
         </div>
       </div>
 

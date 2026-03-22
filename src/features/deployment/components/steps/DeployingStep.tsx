@@ -50,7 +50,7 @@ export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
   const isTerminal = status === "running" || status === "failed";
 
   return (
-    <div className="flex flex-col items-center text-center px-10 py-12 gap-6">
+    <div className="flex flex-col items-center text-center px-6 py-10 sm:px-10 sm:py-12 gap-6">
       {/* Icon */}
       <div className="relative flex items-center justify-center">
         <MoltghostIcon

@@ -17,7 +17,7 @@ export function UserPanel() {
     .join("");
 
   return (
-    <div className="flex flex-col gap-5 px-6 py-6 w-72">
+    <div className="flex flex-col gap-5 px-5 py-6 w-full sm:w-72">
       {/* Avatar + identity */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-white/20 border border-white/25 flex items-center justify-center shrink-0">

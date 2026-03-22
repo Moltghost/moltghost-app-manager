@@ -15,8 +15,8 @@ const TAB_LABELS: Record<string, string> = {
 
 function ComingSoonCard({ label }: { label: string }) {
   return (
-    <GlassCard className="rounded-3xl! overflow-hidden">
-      <div className="flex flex-col items-center justify-center gap-3 px-16 py-14 w-80">
+    <GlassCard className="rounded-3xl! overflow-hidden w-full max-w-sm">
+      <div className="flex flex-col items-center justify-center gap-3 px-8 py-10 sm:px-16 sm:py-14">
         <p className="text-2xl font-semibold text-white/70 tracking-tight">
           Coming Soon
         </p>
@@ -33,7 +33,7 @@ export default function Home() {
     <AuthGate>
       <FullScreenScene>
         <NavGlass selected={activeTab} onTabChange={setActiveTab} />
-        <div className="w-full min-h-full overflow-x-hidden overflow-y-scroll flex flex-col items-center justify-start my-38">
+        <div className="relative z-20 w-full min-h-screen flex flex-col items-center justify-start pt-38 pb-12 sm:py-38 px-4 sm:px-0">
           {activeTab === "5" ? (
             <GlassCard className="rounded-3xl! overflow-hidden">
               <UserPanel />

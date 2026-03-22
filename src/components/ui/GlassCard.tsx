@@ -54,7 +54,7 @@ export function GlassCard({
         aria-hidden
       />
 
-      <div className="relative">{children}</div>
+      {children}
     </Tag>
   );
 }

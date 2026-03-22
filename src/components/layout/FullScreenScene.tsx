@@ -13,7 +13,7 @@ export function FullScreenScene({
     <div className="relative w-full h-screen overflow-y-scroll overflow-x-hidden">
       {/* Background image — set by user later via public/images/ */}
       <div
-        className="fixed inset-0 bg-cover bg-no-repeat"
+        className="fixed inset-0 bg-cover bg-no-repeat z-0"
         style={{
           backgroundImage: `url(${bgImage})`,
           backgroundPosition: "center top",
