@@ -21,7 +21,7 @@ export function GlassCard({
       onClick={onClick}
       style={{
         background:
-          "linear-gradient(180deg, rgba(21,21,21,0.25) 0%, rgba(38,38,38,0.25) 100%)",
+          "linear-gradient(180deg, rgba(21,21,21,0.5) 0%, rgba(38,38,38,0.25) 100%)",
       }}
       className={[
         "relative rounded-[48px] overflow-hidden",

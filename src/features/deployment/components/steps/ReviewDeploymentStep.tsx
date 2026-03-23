@@ -122,6 +122,7 @@ export function ReviewDeploymentStep({
           </ReviewSection>
 
           <ReviewSection title="Infrastructure">
+            <ReviewRow label="GPU" value="NVIDIA L4" />
             <ReviewRow label="Image" value={model.image} />
             <ReviewRow label="Min VRAM" value={`${model.minVram} GB`} />
             <ReviewRow label="Size" value={model.size} />

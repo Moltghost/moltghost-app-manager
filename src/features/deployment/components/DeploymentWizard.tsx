@@ -32,7 +32,6 @@ const ACTIVE_STATUSES: Deployment["status"][] = [
   "pending",
   "provisioning",
   "starting",
-  "running",
 ];
 
 function BackArrow({ onClick }: { onClick: () => void }) {
@@ -68,7 +67,11 @@ function BackArrow({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function DeploymentWizard() {
+interface DeploymentWizardProps {
+  onAgentLive?: (deployment: Deployment) => void;
+}
+
+export function DeploymentWizard({ onAgentLive }: DeploymentWizardProps) {
   const [step, setStep] = useState<Step>("welcome");
   const [mode, setMode] = useState<DeploymentMode | null>(null);
   const [model, setModel] = useState<ModelOption | null>(null);
@@ -167,7 +170,22 @@ export function DeploymentWizard() {
           )}
 
           {step === "deploying" && deployment && (
-            <DeployingStep deploymentId={deployment.id} />
+            <DeployingStep
+              deploymentId={deployment.id}
+              onDone={(d) => {
+                setDeployment(null);
+                setStep("welcome");
+                onAgentLive?.(d);
+              }}
+              onCancel={() => {
+                setDeployment(null);
+                setStep("welcome");
+              }}
+              onRetry={() => {
+                setDeployment(null);
+                setStep("review");
+              }}
+            />
           )}
         </div>
       </GlassCard>

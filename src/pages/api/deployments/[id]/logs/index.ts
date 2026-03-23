@@ -13,9 +13,13 @@ export default async function handler(
   try {
     if (method === "GET") {
       const backendRes = await fetch(`${API_URL}/api/deployments/${id}/logs`, {
-        headers: { Authorization: auth },
+        headers: {
+          Authorization: auth,
+          "Cache-Control": "no-cache",
+        },
       });
       const data = await backendRes.json();
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       res.status(backendRes.status).json(data);
     } else {
       res.setHeader("Allow", ["GET"]);
