@@ -75,6 +75,19 @@ export async function getDeployments(authToken: string): Promise<Deployment[]> {
   return res.json();
 }
 
+export async function getDeploymentLogs(
+  id: string,
+  authToken: string,
+): Promise<
+  Array<{ id: string; message: string; level: string; createdAt: string }>
+> {
+  const res = await fetch(`/api/deployments/${id}/logs`, {
+    headers: authHeaders(authToken),
+  });
+  if (!res.ok) throw new Error("Failed to fetch deployment logs");
+  return res.json();
+}
+
 export async function deleteDeployment(
   id: string,
   authToken: string,

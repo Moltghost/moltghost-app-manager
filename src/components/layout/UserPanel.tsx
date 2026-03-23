@@ -21,6 +21,13 @@ export function UserPanel() {
   const { wallets } = useSolanaWallets();
   const [profile, setProfile] = useState<BackendUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+
+  const handleCopyAddress = (address: string) => {
+    navigator.clipboard.writeText(address);
+    setCopiedAddress(address);
+    setTimeout(() => setCopiedAddress(null), 2000);
+  };
 
   useEffect(() => {
     (async () => {
@@ -104,22 +111,27 @@ export function UserPanel() {
         ) : (
           <div className="flex flex-col gap-2">
             {wallets.map((wallet) => (
-              <div
+              <button
                 key={wallet.address}
-                className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-white/10 border border-white/15"
+                onClick={() => handleCopyAddress(wallet.address)}
+                className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white/15 hover:border-white/25 transition-colors w-full text-left group"
+                title="Click to copy address"
               >
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[10px] text-white/60 capitalize">
                     {wallet.walletClientType ?? "privy"}
                   </span>
-                  <span className="text-xs font-mono text-white/90 truncate">
+                  <span className="text-xs font-mono text-white/90 truncate group-hover:hidden">
                     {wallet.address.slice(0, 4)}…{wallet.address.slice(-4)}
+                  </span>
+                  <span className="text-xs font-mono text-blue-400 hidden group-hover:inline">
+                    {copiedAddress === wallet.address ? "✓ Copied!" : "📋 Copy"}
                   </span>
                 </div>
                 <span className="text-[10px] text-white/55 shrink-0">
                   Solana
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         )}

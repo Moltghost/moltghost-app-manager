@@ -11,6 +11,7 @@ import {
 import { AdminStatsCard } from "./AdminStatsCard";
 import { AdminUsersTable } from "./AdminUsersTable";
 import { AdminDeploymentsTable } from "./AdminDeploymentsTable";
+import { AlertError } from "../../../components/ui/AlertError";
 
 export function AdminDashboard() {
   const { getAccessToken } = usePrivy();
@@ -19,6 +20,9 @@ export function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [deploymentsError, setDeploymentsError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -29,16 +33,38 @@ export function AdminDashboard() {
           return;
         }
 
-        // Fetch all data in parallel
-        const [usersData, deploymentsData, statsData] = await Promise.all([
-          fetchAdminUsers(token),
-          fetchAdminDeployments(token),
-          fetchAdminStats(token),
-        ]);
+        // Fetch stats
+        try {
+          const statsData = await fetchAdminStats(token);
+          setStats(statsData);
+          setStatsError(null);
+        } catch (err) {
+          setStatsError(
+            err instanceof Error ? err.message : "Failed to load stats",
+          );
+        }
 
-        setUsers(usersData);
-        setDeployments(deploymentsData);
-        setStats(statsData);
+        // Fetch users
+        try {
+          const usersData = await fetchAdminUsers(token);
+          setUsers(usersData);
+          setUsersError(null);
+        } catch (err) {
+          setUsersError(
+            err instanceof Error ? err.message : "Failed to load users",
+          );
+        }
+
+        // Fetch deployments
+        try {
+          const deploymentsData = await fetchAdminDeployments(token);
+          setDeployments(deploymentsData);
+          setDeploymentsError(null);
+        } catch (err) {
+          setDeploymentsError(
+            err instanceof Error ? err.message : "Failed to load deployments",
+          );
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load admin data",
@@ -86,6 +112,9 @@ export function AdminDashboard() {
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
           {/* Stats Cards */}
+          {statsError && (
+            <AlertError title="Stats Error" message={statsError} />
+          )}
           <AdminStatsCard stats={stats} loading={loading} />
 
           {/* Users Table */}
@@ -100,6 +129,9 @@ export function AdminDashboard() {
                   : `${users.length} ${users.length === 1 ? "user" : "users"}`}
               </p>
             </div>
+            {usersError && (
+              <AlertError title="Users Loading Error" message={usersError} />
+            )}
             <AdminUsersTable users={users} loading={loading} />
           </div>
 
@@ -115,6 +147,12 @@ export function AdminDashboard() {
                   : `${deployments.length} ${deployments.length === 1 ? "deployment" : "deployments"}`}
               </p>
             </div>
+            {deploymentsError && (
+              <AlertError
+                title="Deployments Loading Error"
+                message={deploymentsError}
+              />
+            )}
             <AdminDeploymentsTable
               deployments={deployments}
               loading={loading}

@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import MoltghostIcon from "@/components/icons/MoltghostIcon";
+import CoffeeIcon from "@/components/icons/CoffeeIcon";
+import { ConsoleLogsModal } from "../ConsoleLogsModal";
 import { getDeployment } from "@/features/deployment/services/deploymentService";
 import type { Deployment } from "@/features/deployment/types";
 
@@ -23,6 +24,8 @@ const STATUS_LABEL: Record<Deployment["status"], string> = {
 
 export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
   const [status, setStatus] = useState<Deployment["status"]>("pending");
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [token, setToken] = useState<string>("");
   const { getAccessToken } = usePrivy();
 
   useEffect(() => {
@@ -30,9 +33,13 @@ export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
 
     async function poll() {
       try {
-        const token = await getAccessToken();
-        if (!token) return;
-        const deployment = await getDeployment(deploymentId, token);
+        const authToken = await getAccessToken();
+        if (!authToken) return;
+
+        // Store token for logs modal
+        if (!token) setToken(authToken);
+
+        const deployment = await getDeployment(deploymentId, authToken);
         if (!active) return;
         setStatus(deployment.status);
 
@@ -52,7 +59,7 @@ export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
     return () => {
       active = false;
     };
-  }, [deploymentId, onDone, getAccessToken]);
+  }, [deploymentId, onDone, getAccessToken, token]);
 
   const isTerminal = status === "running" || status === "failed";
 
@@ -60,11 +67,11 @@ export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
     <div className="flex flex-col items-center text-center px-6 py-10 sm:px-10 sm:py-12 gap-6">
       {/* Icon */}
       <div className="relative flex items-center justify-center">
-        <MoltghostIcon
+        <CoffeeIcon
           width={80}
-          height={80}
+          height={104}
           className={[
-            "transition-opacity duration-500",
+            "transition-opacity duration-500 text-white",
             isTerminal ? "opacity-70" : "opacity-40 animate-pulse",
           ].join(" ")}
         />
@@ -86,15 +93,31 @@ export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
 
       {/* Polling hint */}
       {!isTerminal && (
-        <p className="text-xs text-white/20 mt-2 animate-pulse">
-          Please wait and enjoy your coffee.
-          <br />
-          Estimated time — applying environment variables…
-        </p>
+        <div className="space-y-3 w-full">
+          <p className="text-xs text-white/20 animate-pulse">
+            Please wait and enjoy your coffee.
+            <br />
+            Estimated time — applying environment variables…
+          </p>
+          <button
+            onClick={() => setLogsOpen(true)}
+            className="text-xs text-blue-400 hover:text-blue-300 transition-colors underline"
+          >
+            Console Log
+          </button>
+        </div>
       )}
 
       {/* Step indicator */}
       <p className="text-sm text-white/30 tracking-wide mt-4">5 / 5</p>
+
+      {/* Console Logs Modal */}
+      <ConsoleLogsModal
+        isOpen={logsOpen}
+        deploymentId={deploymentId}
+        token={token}
+        onClose={() => setLogsOpen(false)}
+      />
     </div>
   );
 }

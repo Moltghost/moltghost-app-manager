@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AppPrivyProvider } from "@/providers/PrivyProvider";
 import { AuthGate } from "@/components/auth/AuthGate";
 
 export const metadata: Metadata = {
@@ -12,13 +11,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body className="antialiased bg-black text-white">
-        <AppPrivyProvider>
-          <AuthGate>{children}</AuthGate>
-        </AppPrivyProvider>
-      </body>
-    </html>
-  );
+  return <AuthGate>{children}</AuthGate>;
 }

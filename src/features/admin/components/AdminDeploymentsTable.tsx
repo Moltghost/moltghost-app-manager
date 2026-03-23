@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { AdminDeployment } from "../types";
 
 interface AdminDeploymentsTableProps {
@@ -54,6 +55,13 @@ export function AdminDeploymentsTable({
   deployments,
   loading,
 }: AdminDeploymentsTableProps) {
+  const [copiedWallet, setCopiedWallet] = useState<string | null>(null);
+
+  const handleCopyWallet = (address: string) => {
+    navigator.clipboard.writeText(address);
+    setCopiedWallet(address);
+    setTimeout(() => setCopiedWallet(null), 2000);
+  };
   return (
     <div className="rounded-2xl border border-white/10 bg-white/2 overflow-hidden">
       <div className="overflow-x-auto">
@@ -110,9 +118,28 @@ export function AdminDeploymentsTable({
                         {deployment.userName || "Unknown"}
                       </p>
                       <p className="text-xs text-white/40">
-                        {deployment.userEmail ||
-                          deployment.userWallet?.slice(0, 10) ||
-                          "—"}
+                        {deployment.userEmail ? (
+                          <a
+                            href={`mailto:${deployment.userEmail}`}
+                            className="hover:text-white/60 underline"
+                          >
+                            {deployment.userEmail}
+                          </a>
+                        ) : deployment.userWallet ? (
+                          <button
+                            onClick={() =>
+                              handleCopyWallet(deployment.userWallet!)
+                            }
+                            className="hover:text-blue-400 transition-colors cursor-pointer"
+                            title="Click to copy full address"
+                          >
+                            {copiedWallet === deployment.userWallet
+                              ? "✓ Copied"
+                              : deployment.userWallet.slice(0, 10)}
+                          </button>
+                        ) : (
+                          "—"
+                        )}
                       </p>
                     </div>
                   </td>

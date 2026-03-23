@@ -115,10 +115,21 @@ export function AdminUsersTable({ users, loading }: AdminUsersTableProps) {
                   </td>
                   <td className="px-6 py-4 text-white/50 font-mono text-xs">
                     {user.walletAddress ? (
-                      <span title={user.walletAddress}>
-                        {user.walletAddress.slice(0, 6)}...
-                        {user.walletAddress.slice(-4)}
-                      </span>
+                      <button
+                        onClick={() => handleCopyWallet(user.walletAddress!)}
+                        className="group relative hover:text-white/90 transition-colors"
+                        title="Click to copy full address"
+                      >
+                        <span className="group-hover:hidden">
+                          {user.walletAddress.slice(0, 6)}...
+                          {user.walletAddress.slice(-4)}
+                        </span>
+                        <span className="hidden group-hover:inline text-blue-400">
+                          {copiedWallet === user.walletAddress
+                            ? "✓ Copied"
+                            : "Copy"}
+                        </span>
+                      </button>
                     ) : (
                       <span className="text-white/30">—</span>
                     )}
