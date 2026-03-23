@@ -406,7 +406,7 @@ function AutoSleepSection({ deployment }: { deployment: Deployment }) {
 interface AgentSettingsModalProps {
   deployment: Deployment;
   onClose: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
 }
 
 export function AgentSettingsModal({
@@ -416,6 +416,7 @@ export function AgentSettingsModal({
 }: AgentSettingsModalProps) {
   const [activeSection, setActiveSection] = useState<Section>("general");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   /* ESC to close */
   useEffect(() => {
@@ -534,12 +535,13 @@ export function AgentSettingsModal({
         isOpen={confirmDelete}
         title="Delete Agent"
         message="This will permanently delete the agent and all associated infrastructure (pod, tunnel, DNS). This action cannot be undone."
-        confirmLabel="Delete Agent"
+        confirmLabel={deleting ? "Deleting..." : "Delete Agent"}
         cancelLabel="Cancel"
         variant="danger"
-        onConfirm={() => {
-          setConfirmDelete(false);
-          onDelete();
+        loading={deleting}
+        onConfirm={async () => {
+          setDeleting(true);
+          await onDelete();
         }}
         onCancel={() => setConfirmDelete(false)}
       />

@@ -1,5 +1,6 @@
 "use client";
 import { PrivyProvider } from "@privy-io/react-auth";
+import { SnackbarProvider } from "notistack";
 
 export function AppPrivyProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -25,7 +26,13 @@ export function AppPrivyProvider({ children }: { children: React.ReactNode }) {
         ],
       }}
     >
-      {children}
+      <SnackbarProvider
+        maxSnack={3}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        {children}
+      </SnackbarProvider>
     </PrivyProvider>
   );
 }

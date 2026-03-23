@@ -8,6 +8,8 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { DeploymentWizard } from "@/features/deployment/components/DeploymentWizard";
 import { AgentsPanel } from "@/features/agents/components/AgentsPanel";
 
+import type { Deployment } from "@/features/deployment/types";
+
 const TAB_LABELS: Record<string, string> = {
   "3": "Wallet",
   "4": "Settings",
@@ -28,6 +30,12 @@ function ComingSoonCard({ label }: { label: string }) {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("1");
+  const [pendingAgent, setPendingAgent] = useState<Deployment | null>(null);
+
+  function handleAgentLive(deployment: Deployment) {
+    setPendingAgent(deployment);
+    setActiveTab("2");
+  }
 
   return (
     <AuthGate>
@@ -39,9 +47,13 @@ export default function Home() {
               <UserPanel />
             </GlassCard>
           ) : activeTab === "1" ? (
-            <DeploymentWizard />
+            <DeploymentWizard onAgentLive={handleAgentLive} />
           ) : activeTab === "2" ? (
-            <AgentsPanel onNavigate={setActiveTab} />
+            <AgentsPanel
+              onNavigate={setActiveTab}
+              initialAgent={pendingAgent}
+              onInitialAgentConsumed={() => setPendingAgent(null)}
+            />
           ) : (
             <ComingSoonCard label={TAB_LABELS[activeTab] ?? "This page"} />
           )}

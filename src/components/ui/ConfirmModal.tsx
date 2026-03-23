@@ -10,6 +10,7 @@ interface ConfirmModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: "danger" | "default";
+  loading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -21,6 +22,7 @@ export function ConfirmModal({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   variant = "default",
+  loading = false,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
@@ -111,6 +113,7 @@ export function ConfirmModal({
             variant={isDanger ? "danger" : "primary"}
             size="md"
             onClick={onConfirm}
+            loading={loading}
             className="w-full"
           >
             {confirmLabel}
@@ -119,6 +122,7 @@ export function ConfirmModal({
             variant="secondary"
             size="md"
             onClick={onCancel}
+            disabled={loading}
             className="w-full"
           >
             {cancelLabel}

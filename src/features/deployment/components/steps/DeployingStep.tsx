@@ -4,6 +4,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import CoffeeIcon from "@/components/icons/CoffeeIcon";
 import { ConsoleLogsModal } from "../ConsoleLogsModal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useSnackbar } from "notistack";
 import {
   getDeployment,
   getDeploymentLogs,
@@ -26,11 +27,13 @@ export function DeployingStep({
 }: DeployingStepProps) {
   const [status, setStatus] = useState<Deployment["status"]>("pending");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [latestLog, setLatestLog] = useState<string | null>(null);
   const [logsOpen, setLogsOpen] = useState(false);
   const [token, setToken] = useState<string>("");
   const [cancelling, setCancelling] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { getAccessToken } = usePrivy();
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleCancel = async () => {
     if (cancelling) return;
@@ -43,7 +46,10 @@ export function DeployingStep({
       }
       onCancel?.();
     } catch (err) {
-      console.error("Failed to cancel deployment:", err);
+      enqueueSnackbar(
+        err instanceof Error ? err.message : "Failed to cancel deployment",
+        { variant: "error" },
+      );
       setCancelling(false);
     }
   };
@@ -62,6 +68,14 @@ export function DeployingStep({
         const deployment = await getDeployment(deploymentId, authToken);
         if (!active) return;
         setStatus(deployment.status);
+
+        // Fetch latest log to show current step
+        try {
+          const logs = await getDeploymentLogs(deploymentId, authToken);
+          if (logs.length > 0) {
+            setLatestLog(logs[logs.length - 1].message);
+          }
+        } catch {}
 
         if (deployment.status === "running" || deployment.status === "failed") {
           if (deployment.status === "failed") {
@@ -155,9 +169,9 @@ export function DeployingStep({
           )}
 
           <div className="mb-8 flex flex-col items-center">
-            {!isTerminal && (
-              <p className="text-xs text-white animate-pulse">
-                Pod is starting up — waiting for container to initialize... 30s
+            {!isTerminal && latestLog && (
+              <p className="text-xs text-white/80 animate-pulse truncate max-w-md">
+                {latestLog}
               </p>
             )}
             <button

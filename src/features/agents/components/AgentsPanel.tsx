@@ -5,6 +5,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { GlassCard } from "@/components/ui/GlassCard";
 import MoltghostIcon from "@/components/icons/MoltghostIcon";
 import { getDeployments } from "@/features/deployment/services/deploymentService";
+import { useSnackbar } from "notistack";
 import { AgentDetailView } from "./AgentDetailView";
 import type { Deployment } from "@/features/deployment/types";
 
@@ -161,13 +162,28 @@ function DeployMoreCard({ onClick }: { onClick: () => void }) {
 
 interface AgentsPanelProps {
   onNavigate?: (tab: string) => void;
+  initialAgent?: Deployment | null;
+  onInitialAgentConsumed?: () => void;
 }
 
-export function AgentsPanel({ onNavigate }: AgentsPanelProps) {
+export function AgentsPanel({
+  onNavigate,
+  initialAgent,
+  onInitialAgentConsumed,
+}: AgentsPanelProps) {
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<Deployment | null>(null);
   const { getAccessToken } = usePrivy();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // If an initialAgent is passed (from deployment), open its detail view immediately
+  useEffect(() => {
+    if (initialAgent) {
+      setSelectedAgent(initialAgent);
+      onInitialAgentConsumed?.();
+    }
+  }, [initialAgent, onInitialAgentConsumed]);
 
   useEffect(() => {
     let active = true;
@@ -179,7 +195,10 @@ export function AgentsPanel({ onNavigate }: AgentsPanelProps) {
         const data = await getDeployments(token);
         if (active) setDeployments(data);
       } catch (err) {
-        console.error("Failed to load deployments:", err);
+        enqueueSnackbar(
+          err instanceof Error ? err.message : "Failed to load agents",
+          { variant: "error" },
+        );
       } finally {
         if (active) setLoading(false);
       }
@@ -195,7 +214,17 @@ export function AgentsPanel({ onNavigate }: AgentsPanelProps) {
     return (
       <AgentDetailView
         deployment={selectedAgent}
-        onBack={() => setSelectedAgent(null)}
+        onBack={async () => {
+          // Re-fetch first so the grid is up-to-date before we show it
+          try {
+            const token = await getAccessToken();
+            if (token) {
+              const data = await getDeployments(token);
+              setDeployments(data);
+            }
+          } catch {}
+          setSelectedAgent(null);
+        }}
       />
     );
   }
@@ -211,9 +240,9 @@ export function AgentsPanel({ onNavigate }: AgentsPanelProps) {
   if (deployments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <MoltghostIcon className="w-12 h-12 text-white/20" />
-        <p className="text-sm text-white/40">No agents deployed yet.</p>
-        <p className="text-xs text-white/25">
+        <MoltghostIcon className="w-12 h-12 text-white/60" />
+        <p className="text-sm text-white">No agents deployed yet.</p>
+        <p className="text-xs text-white/70">
           Go to the Home tab to deploy your first agent.
         </p>
       </div>

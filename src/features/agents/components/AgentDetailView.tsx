@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import MoltghostIcon from "@/components/icons/MoltghostIcon";
+import { useSnackbar } from "notistack";
 import type { Deployment } from "@/features/deployment/types";
 import { deleteDeployment } from "@/features/deployment/services/deploymentService";
 import { AgentSettingsModal } from "./AgentSettingsModal";
@@ -150,13 +151,22 @@ export function AgentDetailView({ deployment, onBack }: AgentDetailViewProps) {
   const [message, setMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { getAccessToken } = usePrivy();
+  const { enqueueSnackbar } = useSnackbar();
   const isRunning = deployment.status === "running";
 
   async function handleDelete() {
-    const token = await getAccessToken();
-    if (!token) return;
-    await deleteDeployment(deployment.id, token);
-    onBack();
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      await deleteDeployment(deployment.id, token);
+      setSettingsOpen(false);
+      onBack();
+    } catch (err) {
+      enqueueSnackbar(
+        err instanceof Error ? err.message : "Failed to delete agent",
+        { variant: "error" },
+      );
+    }
   }
 
   return (
