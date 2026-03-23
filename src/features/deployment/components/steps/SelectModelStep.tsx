@@ -1,16 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePrivy } from "@privy-io/react-auth";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { fetchModels } from "@/features/deployment/services/deploymentService";
-import type { ModelOption } from "@/features/deployment/types";
-
-interface GpuType {
-  id: string;
-  displayName: string;
-  memoryInGb: number;
-  securePrice: number | null;
-  communityPrice: number | null;
-}
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import {
+  fetchModels,
+  fetchGpuTypes,
+} from "@/features/deployment/services/deploymentService";
+import type { GpuType, ModelOption } from "@/features/deployment/types";
 
 interface SelectModelStepProps {
   onNext: (model: ModelOption) => void;
@@ -45,21 +42,27 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
   const [models, setModels] = useState<ModelOption[]>([]);
   const [gpu, setGpu] = useState<GpuType>(FALLBACK_GPU);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { getAccessToken } = usePrivy();
 
   useEffect(() => {
-    Promise.all([
-      fetchModels(),
-      fetch("/api/runpod/gpu-types")
-        .then((r) => (r.ok ? r.json() : []))
-        .catch(() => []),
-    ])
-      .then(([fetchedModels, gpuTypes]) => {
+    (async () => {
+      try {
+        const token = await getAccessToken();
+        const [fetchedModels, gpuTypes] = await Promise.all([
+          fetchModels(),
+          token ? fetchGpuTypes(token).catch(() => []) : Promise.resolve([]),
+        ]);
         setModels(fetchedModels);
         const l4 = (gpuTypes as GpuType[]).find((g) => g.id === "NVIDIA L4");
         if (l4) setGpu(l4);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load models");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [getAccessToken]);
 
   return (
     <div className="flex flex-col items-center gap-6 sm:gap-8 px-4 py-8 sm:px-8 sm:py-10">

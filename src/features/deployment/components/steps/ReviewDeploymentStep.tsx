@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { usePrivy } from "@privy-io/react-auth";
 import { Button } from "@/components/ui/Button";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { createDeployment } from "@/features/deployment/services/deploymentService";
 import type {
@@ -59,6 +61,7 @@ export function ReviewDeploymentStep({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const { getAccessToken } = usePrivy();
 
   const isProduction = process.env.NODE_ENV === "production";
 
@@ -71,7 +74,12 @@ export function ReviewDeploymentStep({
     setLoading(true);
     setError(null);
     try {
-      const deployment = await createDeployment({ mode, model, settings });
+      const token = await getAccessToken();
+      if (!token) throw new Error("Not authenticated");
+      const deployment = await createDeployment(
+        { mode, model, settings },
+        token,
+      );
       onLaunched(deployment);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Launch failed");
@@ -184,7 +192,9 @@ export function ReviewDeploymentStep({
           </ReviewSection>
         </GlassCard>
 
-        {error && <p className="text-xs text-red-400/80">{error}</p>}
+        {error && (
+          <ErrorDialog message={error} onClose={() => setError(null)} />
+        )}
 
         <Button
           variant="glass"

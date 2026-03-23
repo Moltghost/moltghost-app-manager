@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePrivy } from "@privy-io/react-auth";
 import MoltghostIcon from "@/components/icons/MoltghostIcon";
 import { getDeployment } from "@/features/deployment/services/deploymentService";
 import type { Deployment } from "@/features/deployment/types";
@@ -10,8 +11,11 @@ interface DeployingStepProps {
 }
 
 const STATUS_LABEL: Record<Deployment["status"], string> = {
-  pending:
-    "MoltGhost is provisioning the resources, installing the local LLM, and configuring the agent runtime. This may take a few minutes.",
+  pending: "Queued. Waiting for orchestration to start…",
+  provisioning:
+    "Setting up Cloudflare Tunnel and allocating GPU resources. This may take a moment.",
+  starting:
+    "Pod is up. Installing the local LLM and configuring the agent runtime. This may take a few minutes.",
   running: "Your agent is live and ready to use.",
   stopped: "Your agent has been stopped.",
   failed: "Deployment failed. Please try again.",
@@ -19,13 +23,16 @@ const STATUS_LABEL: Record<Deployment["status"], string> = {
 
 export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
   const [status, setStatus] = useState<Deployment["status"]>("pending");
+  const { getAccessToken } = usePrivy();
 
   useEffect(() => {
     let active = true;
 
     async function poll() {
       try {
-        const deployment = await getDeployment(deploymentId);
+        const token = await getAccessToken();
+        if (!token) return;
+        const deployment = await getDeployment(deploymentId, token);
         if (!active) return;
         setStatus(deployment.status);
 
@@ -45,7 +52,7 @@ export function DeployingStep({ deploymentId, onDone }: DeployingStepProps) {
     return () => {
       active = false;
     };
-  }, [deploymentId, onDone]);
+  }, [deploymentId, onDone, getAccessToken]);
 
   const isTerminal = status === "running" || status === "failed";
 

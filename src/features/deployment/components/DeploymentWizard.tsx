@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePrivy } from "@privy-io/react-auth";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { DeploymentModeStep } from "./steps/DeploymentModeStep";
@@ -7,6 +8,8 @@ import { SelectModelStep } from "./steps/SelectModelStep";
 import { ConfigureSettingsStep } from "./steps/ConfigureSettingsStep";
 import { ReviewDeploymentStep } from "./steps/ReviewDeploymentStep";
 import { DeployingStep } from "./steps/DeployingStep";
+import { getDeployments } from "@/features/deployment/services/deploymentService";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import type {
   DeploymentMode,
   ModelOption,
@@ -24,6 +27,13 @@ const BACK_MAP: Partial<Record<Step, Step>> = {
   settings: "model",
   review: "settings",
 };
+
+const ACTIVE_STATUSES: Deployment["status"][] = [
+  "pending",
+  "provisioning",
+  "starting",
+  "running",
+];
 
 function BackArrow({ onClick }: { onClick: () => void }) {
   return (
@@ -66,63 +76,101 @@ export function DeploymentWizard() {
     DEFAULT_AGENT_SETTINGS,
   );
   const [deployment, setDeployment] = useState<Deployment | null>(null);
+  const [checking, setChecking] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { getAccessToken } = usePrivy();
+
+  // On mount: check if user already has an active deployment
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+        const list = await getDeployments(token);
+        const active = list.find((d) => ACTIVE_STATUSES.includes(d.status));
+        if (active) {
+          setDeployment(active);
+          setStep("deploying");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load deployments",
+        );
+      } finally {
+        setChecking(false);
+      }
+    })();
+  }, [getAccessToken]);
+
+  if (checking) {
+    return (
+      <GlassCard className="w-full max-w-2xl">
+        <div className="flex items-center justify-center py-24">
+          <span className="w-6 h-6 rounded-full border-2 border-white/30 border-t-white/80 animate-spin" />
+        </div>
+      </GlassCard>
+    );
+  }
 
   return (
-    <GlassCard
-      className={
-        WIDE_STEPS.includes(step) ? "w-full max-w-4xl" : "w-full max-w-2xl"
-      }
-    >
-      <div className="relative">
-        {BACK_MAP[step] && (
-          <BackArrow onClick={() => setStep(BACK_MAP[step]!)} />
-        )}
+    <>
+      {error && <ErrorDialog message={error} onClose={() => setError(null)} />}
+      <GlassCard
+        className={
+          WIDE_STEPS.includes(step) ? "w-full max-w-4xl" : "w-full max-w-2xl"
+        }
+      >
+        <div className="relative">
+          {BACK_MAP[step] && (
+            <BackArrow onClick={() => setStep(BACK_MAP[step]!)} />
+          )}
 
-        {step === "welcome" && <WelcomeStep onNext={() => setStep("mode")} />}
+          {step === "welcome" && <WelcomeStep onNext={() => setStep("mode")} />}
 
-        {step === "mode" && (
-          <DeploymentModeStep
-            onNext={(selected) => {
-              setMode(selected);
-              setStep("model");
-            }}
-          />
-        )}
+          {step === "mode" && (
+            <DeploymentModeStep
+              onNext={(selected) => {
+                setMode(selected);
+                setStep("model");
+              }}
+            />
+          )}
 
-        {step === "model" && (
-          <SelectModelStep
-            onNext={(selected) => {
-              setModel(selected);
-              setStep("settings");
-            }}
-          />
-        )}
+          {step === "model" && (
+            <SelectModelStep
+              onNext={(selected) => {
+                setModel(selected);
+                setStep("settings");
+              }}
+            />
+          )}
 
-        {step === "settings" && (
-          <ConfigureSettingsStep
-            onNext={(selected) => {
-              setSettings(selected);
-              setStep("review");
-            }}
-          />
-        )}
+          {step === "settings" && (
+            <ConfigureSettingsStep
+              onNext={(selected) => {
+                setSettings(selected);
+                setStep("review");
+              }}
+            />
+          )}
 
-        {step === "review" && mode && model && (
-          <ReviewDeploymentStep
-            mode={mode}
-            model={model}
-            settings={settings}
-            onLaunched={(created) => {
-              setDeployment(created);
-              setStep("deploying");
-            }}
-          />
-        )}
+          {step === "review" && mode && model && (
+            <ReviewDeploymentStep
+              mode={mode}
+              model={model}
+              settings={settings}
+              onLaunched={(created) => {
+                setDeployment(created);
+                setStep("deploying");
+              }}
+            />
+          )}
 
-        {step === "deploying" && deployment && (
-          <DeployingStep deploymentId={deployment.id} />
-        )}
-      </div>
-    </GlassCard>
+          {step === "deploying" && deployment && (
+            <DeployingStep deploymentId={deployment.id} />
+          )}
+        </div>
+      </GlassCard>
+    </>
   );
 }

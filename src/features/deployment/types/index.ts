@@ -66,13 +66,31 @@ export const DEFAULT_AGENT_SETTINGS: AgentSettings = {
   },
 };
 
+// ─── GPU ──────────────────────────────────────────────────────────────────────
+
+export interface GpuType {
+  id: string;
+  displayName: string;
+  memoryInGb: number;
+  securePrice: number | null;
+  communityPrice: number | null;
+  lowestPrice?: { minimumBidPrice: number; uninterruptablePrice: number };
+}
+
 // ─── Deployment ───────────────────────────────────────────────────────────────
 
-export type DeploymentStatus = "pending" | "running" | "stopped" | "failed";
+export type DeploymentStatus =
+  | "pending"
+  | "provisioning"
+  | "starting"
+  | "running"
+  | "stopped"
+  | "failed";
 export type DeploymentMode = "dedicated" | "shared" | "external";
 
 export interface Deployment {
   id: string;
+  userId: string;
   mode: DeploymentMode;
   modelId: string;
   modelLabel: string;
@@ -85,6 +103,12 @@ export interface Deployment {
   notifications: AgentNotifications;
   autoSleep: AgentAutoSleep;
   status: DeploymentStatus;
+  // infra fields (null until provisioned)
+  podId: string | null;
+  tunnelId: string | null;
+  tunnelToken: string | null;
+  agentDomain: string | null;
+  dnsRecordId: string | null;
   createdAt: string;
   updatedAt: string;
 }
