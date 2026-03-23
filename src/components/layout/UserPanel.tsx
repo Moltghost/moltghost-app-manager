@@ -92,7 +92,7 @@ export function UserPanel() {
         </div>
       </div>
 
-      <div className="h-px bg-white/[0.12]" />
+      <div className="h-px bg-white/12" />
 
       {/* Connected wallets */}
       <div className="flex flex-col gap-2">
@@ -125,7 +125,7 @@ export function UserPanel() {
         )}
       </div>
 
-      <div className="h-px bg-white/[0.12]" />
+      <div className="h-px bg-white/12" />
 
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-semibold text-white/50 uppercase tracking-widest">

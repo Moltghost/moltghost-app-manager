@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import HomeIcon from "@/components/icons/HomeIcon";
-import ClawsIcon from "@/components/icons/ClawsIcon";
+import DashboardIcon from "@/components/icons/DashboardIcon";
 import WalletIcon from "@/components/icons/WalletIcon";
 import SettingsIcon from "@/components/icons/SettingsIcon";
 import UserIcon from "@/components/icons/UserIcon";
@@ -44,12 +44,12 @@ const NavGlass = ({ selected, onTabChange }: NavGlassProps) => {
             className="switcher__input"
             type="radio"
             name="nav"
-            value="claws"
+            value="dashboard"
             data-c-option="2"
             checked={selected === "2"}
             onChange={() => handleChange("2")}
           />
-          <ClawsIcon className="switcher__icon" />
+          <DashboardIcon className="switcher__icon" />
         </label>
         <label className="switcher__option">
           <input

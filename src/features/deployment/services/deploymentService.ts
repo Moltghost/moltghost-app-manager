@@ -6,7 +6,8 @@ import type {
   ModelOption,
 } from "../types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+// Use Next.js local API routes
+const API_URL = "";
 
 function authHeaders(token: string) {
   return {
@@ -16,13 +17,13 @@ function authHeaders(token: string) {
 }
 
 export async function fetchModels(): Promise<ModelOption[]> {
-  const res = await fetch(`${API_URL}/api/models`);
+  const res = await fetch(`/api/models`);
   if (!res.ok) throw new Error("Failed to fetch models");
   return res.json();
 }
 
 export async function fetchGpuTypes(authToken: string): Promise<GpuType[]> {
-  const res = await fetch(`${API_URL}/api/runpod/gpu-types`, {
+  const res = await fetch(`/api/runpod/gpu-types`, {
     headers: authHeaders(authToken),
   });
   if (!res.ok) throw new Error("Failed to fetch GPU types");
@@ -38,7 +39,7 @@ export async function createDeployment(
   authToken: string,
 ): Promise<Deployment> {
   const { mode, model, settings } = payload;
-  const res = await fetch(`${API_URL}/api/deployments`, {
+  const res = await fetch(`/api/deployments`, {
     method: "POST",
     headers: authHeaders(authToken),
     body: JSON.stringify({
@@ -59,7 +60,7 @@ export async function getDeployment(
   id: string,
   authToken: string,
 ): Promise<Deployment> {
-  const res = await fetch(`${API_URL}/api/deployments/${id}`, {
+  const res = await fetch(`/api/deployments/${id}`, {
     headers: authHeaders(authToken),
   });
   if (!res.ok) throw new Error("Failed to fetch deployment");
@@ -67,7 +68,7 @@ export async function getDeployment(
 }
 
 export async function getDeployments(authToken: string): Promise<Deployment[]> {
-  const res = await fetch(`${API_URL}/api/deployments`, {
+  const res = await fetch(`/api/deployments`, {
     headers: authHeaders(authToken),
   });
   if (!res.ok) throw new Error("Failed to fetch deployments");
@@ -78,7 +79,7 @@ export async function deleteDeployment(
   id: string,
   authToken: string,
 ): Promise<void> {
-  const res = await fetch(`${API_URL}/api/deployments/${id}`, {
+  const res = await fetch(`/api/deployments/${id}`, {
     method: "DELETE",
     headers: authHeaders(authToken),
   });

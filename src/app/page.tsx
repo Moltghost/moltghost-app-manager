@@ -6,9 +6,10 @@ import NavGlass from "@/components/layout/NavGlass";
 import { UserPanel } from "@/components/layout/UserPanel";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { DeploymentWizard } from "@/features/deployment/components/DeploymentWizard";
+import { DashboardPanel } from "@/features/dashboard/components/DashboardPanel";
 
 const TAB_LABELS: Record<string, string> = {
-  "2": "Claws",
+  "2": "Dashboard",
   "3": "Wallet",
   "4": "Settings",
 };
@@ -40,6 +41,8 @@ export default function Home() {
             </GlassCard>
           ) : activeTab === "1" ? (
             <DeploymentWizard />
+          ) : activeTab === "2" ? (
+            <DashboardPanel />
           ) : (
             <ComingSoonCard label={TAB_LABELS[activeTab] ?? "This page"} />
           )}
