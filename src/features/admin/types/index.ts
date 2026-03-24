@@ -15,6 +15,9 @@ export interface AdminDeployment {
   userName: string | null;
   userEmail: string | null;
   userWallet: string | null;
+  agentName: string | null;
+  agentDescription: string | null;
+  isEncrypted: boolean;
   mode: "dedicated" | "shared" | "external";
   modelId: string;
   modelLabel: string;

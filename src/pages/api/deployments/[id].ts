@@ -29,8 +29,19 @@ export default async function handler(
         data = await backendRes.json();
         res.status(backendRes.status).json(data);
       }
+    } else if (method === "PATCH") {
+      backendRes = await fetch(`${API_URL}/api/deployments/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: auth,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+      data = await backendRes.json();
+      res.status(backendRes.status).json(data);
     } else {
-      res.setHeader("Allow", ["GET", "DELETE"]);
+      res.setHeader("Allow", ["GET", "DELETE", "PATCH"]);
       res.status(405).end(`Method ${method} Not Allowed`);
     }
   } catch (err) {

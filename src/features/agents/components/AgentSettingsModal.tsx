@@ -2,8 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { usePrivy } from "@privy-io/react-auth";
+import { useSnackbar } from "notistack";
 import { Switch } from "@/components/ui/Switch";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { updateDeployment } from "@/features/deployment/services/deploymentService";
+import { useEncryptionKey } from "@/hooks/useEncryptionKey";
+import { encrypt, decrypt } from "@/lib/crypto";
 import type { Deployment } from "@/features/deployment/types";
 
 /* ─── Types ────────────────────────────────────────────────────────────────── */
@@ -190,10 +195,85 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function GeneralSection({
   deployment,
   onDeleteClick,
+  onUpdated,
 }: {
   deployment: Deployment;
   onDeleteClick: () => void;
+  onUpdated?: (d: Deployment) => void;
 }) {
+  const [name, setName] = useState(deployment.agentName ?? "");
+  const [desc, setDesc] = useState(deployment.agentDescription ?? "");
+  const [saving, setSaving] = useState(false);
+  const [decrypting, setDecrypting] = useState(deployment.isEncrypted);
+  const { getAccessToken } = usePrivy();
+  const { enqueueSnackbar } = useSnackbar();
+  const { getKey } = useEncryptionKey();
+
+  // Decrypt values on mount for encrypted deployments
+  useEffect(() => {
+    if (!deployment.isEncrypted) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const key = await getKey();
+        const decName = deployment.agentName
+          ? await decrypt(deployment.agentName, key)
+          : "";
+        const decDesc = deployment.agentDescription
+          ? await decrypt(deployment.agentDescription, key)
+          : "";
+        if (!cancelled) {
+          setName(decName);
+          setDesc(decDesc);
+          setDecrypting(false);
+        }
+      } catch {
+        if (!cancelled) setDecrypting(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [deployment, getKey]);
+
+  const hasChanges =
+    name !== (deployment.agentName ?? "") ||
+    desc !== (deployment.agentDescription ?? "");
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+
+      // Re-encrypt before saving
+      const key = await getKey();
+      const encName = name ? await encrypt(name, key) : "";
+      const encDesc = desc ? await encrypt(desc, key) : "";
+
+      const updated = await updateDeployment(
+        deployment.id,
+        {
+          agentName: encName,
+          agentDescription: encDesc,
+          isEncrypted: true,
+          encryptionVersion: "v1",
+        },
+        token,
+      );
+
+      // Pass decrypted version to parent for display
+      onUpdated?.({ ...updated, agentName: name, agentDescription: desc });
+      enqueueSnackbar("Agent updated", { variant: "success" });
+    } catch (err) {
+      enqueueSnackbar(err instanceof Error ? err.message : "Failed to update", {
+        variant: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const created = new Date(deployment.createdAt);
   const statusColor =
     deployment.status === "running"
@@ -204,6 +284,50 @@ function GeneralSection({
 
   return (
     <div className="space-y-8">
+      {/* Agent Identity */}
+      <div>
+        <SectionTitle>Agent Identity</SectionTitle>
+        <div className="rounded-2xl bg-white/[0.03] border border-white/6 px-5 py-4 space-y-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-white/50">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={60}
+              placeholder={decrypting ? "Decrypting…" : "Agent name"}
+              disabled={decrypting}
+              className="w-full text-sm text-white bg-white/5 border border-white/10 rounded-lg px-3 py-2 placeholder:text-white/25 focus:outline-none focus:border-white/25 transition-colors disabled:opacity-50"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-white/50">
+              Description
+            </label>
+            <input
+              type="text"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              maxLength={200}
+              placeholder={decrypting ? "Decrypting…" : "Short description"}
+              disabled={decrypting}
+              className="w-full text-sm text-white bg-white/5 border border-white/10 rounded-lg px-3 py-2 placeholder:text-white/25 focus:outline-none focus:border-white/25 transition-colors disabled:opacity-50"
+            />
+          </div>
+          {hasChanges && (
+            <div className="flex justify-end">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-4 py-1.5 text-sm font-medium rounded-lg bg-white/10 text-white border border-white/15 hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div>
         <SectionTitle>Agent Information</SectionTitle>
         <div className="rounded-2xl bg-white/[0.03] border border-white/6 px-5">
@@ -407,12 +531,14 @@ interface AgentSettingsModalProps {
   deployment: Deployment;
   onClose: () => void;
   onDelete: () => Promise<void>;
+  onUpdated?: (d: Deployment) => void;
 }
 
 export function AgentSettingsModal({
   deployment,
   onClose,
   onDelete,
+  onUpdated,
 }: AgentSettingsModalProps) {
   const [activeSection, setActiveSection] = useState<Section>("general");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -435,6 +561,7 @@ export function AgentSettingsModal({
           <GeneralSection
             deployment={deployment}
             onDeleteClick={() => setConfirmDelete(true)}
+            onUpdated={onUpdated}
           />
         );
       case "model":

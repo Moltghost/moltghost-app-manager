@@ -6,6 +6,7 @@ import MoltghostIcon from "@/components/icons/MoltghostIcon";
 import { useSnackbar } from "notistack";
 import type { Deployment } from "@/features/deployment/types";
 import { deleteDeployment } from "@/features/deployment/services/deploymentService";
+import { ConsoleLogsModal } from "@/features/deployment/components/ConsoleLogsModal";
 import { AgentSettingsModal } from "./AgentSettingsModal";
 
 /* ─── Status Pill ──────────────────────────────────────────────────────────── */
@@ -78,6 +79,27 @@ function RestartIcon() {
   );
 }
 
+function LogIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <polyline points="10 9 9 9 8 9" />
+    </svg>
+  );
+}
+
 function SettingsGearIcon() {
   return (
     <svg
@@ -145,11 +167,18 @@ function ModelIcon() {
 interface AgentDetailViewProps {
   deployment: Deployment;
   onBack: () => void;
+  onUpdated?: (d: Deployment) => void;
 }
 
-export function AgentDetailView({ deployment, onBack }: AgentDetailViewProps) {
+export function AgentDetailView({
+  deployment,
+  onBack,
+  onUpdated,
+}: AgentDetailViewProps) {
   const [message, setMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [authToken, setAuthToken] = useState("");
   const { getAccessToken } = usePrivy();
   const { enqueueSnackbar } = useSnackbar();
   const isRunning = deployment.status === "running";
@@ -172,6 +201,27 @@ export function AgentDetailView({ deployment, onBack }: AgentDetailViewProps) {
   return (
     <>
       <div className="w-full max-w-4xl mx-auto">
+        {/* Back button above card */}
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-white/50 hover:text-white/80 transition-colors cursor-pointer mb-4 group"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 8L2 12L6 16" />
+            <path d="M2 12H22" />
+          </svg>
+          <span className="text-sm">Back to Agents</span>
+        </button>
+
         <div
           className="relative rounded-3xl overflow-hidden backdrop-blur-2xl"
           style={{
@@ -225,6 +275,18 @@ export function AgentDetailView({ deployment, onBack }: AgentDetailViewProps) {
                 </ActionButton>
                 <ActionButton title="Restart agent">
                   <RestartIcon />
+                </ActionButton>
+                <ActionButton
+                  title="Console logs"
+                  onClick={async () => {
+                    const t = await getAccessToken();
+                    if (t) {
+                      setAuthToken(t);
+                      setLogsOpen(true);
+                    }
+                  }}
+                >
+                  <LogIcon />
                 </ActionButton>
                 <ActionButton
                   title="Agent settings"
@@ -305,11 +367,19 @@ export function AgentDetailView({ deployment, onBack }: AgentDetailViewProps) {
         </div>
       </div>
 
+      <ConsoleLogsModal
+        isOpen={logsOpen}
+        deploymentId={deployment.id}
+        token={authToken}
+        onClose={() => setLogsOpen(false)}
+      />
+
       {settingsOpen && (
         <AgentSettingsModal
           deployment={deployment}
           onClose={() => setSettingsOpen(false)}
           onDelete={handleDelete}
+          onUpdated={onUpdated}
         />
       )}
     </>

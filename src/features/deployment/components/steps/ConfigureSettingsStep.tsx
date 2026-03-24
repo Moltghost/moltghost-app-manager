@@ -157,6 +157,52 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
       </div>
 
       <div className="w-full flex flex-col gap-10">
+        {/* Agent Identity */}
+        <div>
+          <SectionHeader
+            title="Agent Identity"
+            subtitle="Give your agent a name and a short description so you can easily identify it."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-white/80">
+                Agent Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. My Trading Agent"
+                value={settings.agentName}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    agentName: e.target.value,
+                  }))
+                }
+                maxLength={60}
+                className="w-full text-sm text-white bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 placeholder:text-white/25 focus:outline-none focus:border-white/25 transition-colors"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-white/80">
+                Description
+              </label>
+              <input
+                type="text"
+                placeholder="What does this agent do?"
+                value={settings.agentDescription}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    agentDescription: e.target.value,
+                  }))
+                }
+                maxLength={200}
+                className="w-full text-sm text-white bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 placeholder:text-white/25 focus:outline-none focus:border-white/25 transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Skills */}
         <div>
           <SectionHeader
@@ -342,6 +388,9 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
         variant="glass"
         size="md"
         onClick={() => onNext(settings)}
+        disabled={
+          !settings.agentName.trim() || !settings.agentDescription.trim()
+        }
         className="rounded-full px-10 mt-2"
       >
         Continue

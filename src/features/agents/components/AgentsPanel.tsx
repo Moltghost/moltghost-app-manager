@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { GlassCard } from "@/components/ui/GlassCard";
 import MoltghostIcon from "@/components/icons/MoltghostIcon";
 import { getDeployments } from "@/features/deployment/services/deploymentService";
 import { useSnackbar } from "notistack";
 import { AgentDetailView } from "./AgentDetailView";
+import { useEncryptionKey } from "@/hooks/useEncryptionKey";
+import { decrypt } from "@/lib/crypto";
 import type { Deployment } from "@/features/deployment/types";
 
 /* ─── Status badge ─────────────────────────────────────────────────────────── */
@@ -62,14 +64,15 @@ function AgentCard({
             <MoltghostIcon className="w-8 h-8 text-white/60 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-white leading-tight">
-                {deployment.modelLabel}
+                {deployment.agentName || deployment.modelLabel}
               </p>
-              <p className="text-[11px] text-white/40 mt-0.5">
-                {deployment.mode === "dedicated"
-                  ? "Dedicated Agent"
-                  : deployment.mode === "shared"
-                    ? "Shared Agent"
-                    : "External Agent"}
+              <p className="text-[11px] text-white/40 mt-0.5 truncate max-w-[180px]">
+                {deployment.agentDescription ||
+                  (deployment.mode === "dedicated"
+                    ? "Dedicated Agent"
+                    : deployment.mode === "shared"
+                      ? "Shared Agent"
+                      : "External Agent")}
               </p>
             </div>
           </div>
@@ -176,6 +179,36 @@ export function AgentsPanel({
   const [selectedAgent, setSelectedAgent] = useState<Deployment | null>(null);
   const { getAccessToken } = usePrivy();
   const { enqueueSnackbar } = useSnackbar();
+  const { getKey } = useEncryptionKey();
+
+  /** Decrypt agentName/agentDescription for encrypted deployments */
+  const decryptDeployments = useCallback(
+    async (rows: Deployment[]): Promise<Deployment[]> => {
+      const hasEncrypted = rows.some((d) => d.isEncrypted);
+      if (!hasEncrypted) return rows;
+
+      const key = await getKey();
+      return Promise.all(
+        rows.map(async (d) => {
+          if (!d.isEncrypted) return d;
+          try {
+            return {
+              ...d,
+              agentName: d.agentName
+                ? await decrypt(d.agentName, key)
+                : d.agentName,
+              agentDescription: d.agentDescription
+                ? await decrypt(d.agentDescription, key)
+                : d.agentDescription,
+            };
+          } catch {
+            return d; // decryption failed — show raw
+          }
+        }),
+      );
+    },
+    [getKey],
+  );
 
   // If an initialAgent is passed (from deployment), open its detail view immediately
   useEffect(() => {
@@ -193,7 +226,9 @@ export function AgentsPanel({
         const token = await getAccessToken();
         if (!token || !active) return;
         const data = await getDeployments(token);
-        if (active) setDeployments(data);
+        if (!active) return;
+        const decrypted = await decryptDeployments(data);
+        if (active) setDeployments(decrypted);
       } catch (err) {
         enqueueSnackbar(
           err instanceof Error ? err.message : "Failed to load agents",
@@ -220,10 +255,17 @@ export function AgentsPanel({
             const token = await getAccessToken();
             if (token) {
               const data = await getDeployments(token);
-              setDeployments(data);
+              const decrypted = await decryptDeployments(data);
+              setDeployments(decrypted);
             }
           } catch {}
           setSelectedAgent(null);
+        }}
+        onUpdated={(updated) => {
+          setSelectedAgent(updated);
+          setDeployments((prev) =>
+            prev.map((d) => (d.id === updated.id ? updated : d)),
+          );
         }}
       />
     );

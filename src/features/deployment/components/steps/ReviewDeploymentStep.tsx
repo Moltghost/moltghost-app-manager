@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { createDeployment } from "@/features/deployment/services/deploymentService";
+import { useEncryptionKey } from "@/hooks/useEncryptionKey";
+import { encrypt } from "@/lib/crypto";
 import type {
   AgentSettings,
   Deployment,
@@ -62,6 +64,7 @@ export function ReviewDeploymentStep({
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const { getAccessToken } = usePrivy();
+  const { getKey } = useEncryptionKey();
 
   const isProduction = process.env.NODE_ENV === "production";
 
@@ -76,8 +79,27 @@ export function ReviewDeploymentStep({
     try {
       const token = await getAccessToken();
       if (!token) throw new Error("Not authenticated");
+
+      // Zero-knowledge encrypt sensitive fields before sending to backend
+      const key = await getKey();
+      const encryptedSettings: AgentSettings = {
+        ...settings,
+        agentName: settings.agentName
+          ? await encrypt(settings.agentName, key)
+          : "",
+        agentDescription: settings.agentDescription
+          ? await encrypt(settings.agentDescription, key)
+          : "",
+      };
+
       const deployment = await createDeployment(
-        { mode, model, settings },
+        {
+          mode,
+          model,
+          settings: encryptedSettings,
+          isEncrypted: true,
+          encryptionVersion: "v1",
+        },
         token,
       );
       onLaunched(deployment);
@@ -115,6 +137,11 @@ export function ReviewDeploymentStep({
           <p className="text-sm font-semibold text-white/80 border-b border-white/10 pb-3">
             {MODE_LABEL[mode]}
           </p>
+
+          <ReviewSection title="Agent Identity">
+            <ReviewRow label="Name" value={settings.agentName} />
+            <ReviewRow label="Description" value={settings.agentDescription} />
+          </ReviewSection>
 
           <ReviewSection title="Runtime Template">
             <ReviewRow label="Template" value="OpenClaw 2026.1.0" />

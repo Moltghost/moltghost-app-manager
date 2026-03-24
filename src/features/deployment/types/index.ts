@@ -36,6 +36,8 @@ export interface AgentAutoSleep {
 }
 
 export interface AgentSettings {
+  agentName: string;
+  agentDescription: string;
   skills: string[];
   memory: AgentMemory;
   agentBehavior: AgentBehavior;
@@ -44,6 +46,8 @@ export interface AgentSettings {
 }
 
 export const DEFAULT_AGENT_SETTINGS: AgentSettings = {
+  agentName: "",
+  agentDescription: "",
   skills: ["solana_private_transaction", "brave_search", "file_system_access"],
   memory: {
     enablePrivateMemory: true,
@@ -91,6 +95,8 @@ export type DeploymentMode = "dedicated" | "shared" | "external";
 export interface Deployment {
   id: string;
   userId: string;
+  agentName: string | null;
+  agentDescription: string | null;
   mode: DeploymentMode;
   modelId: string;
   modelLabel: string;
@@ -103,6 +109,9 @@ export interface Deployment {
   notifications: AgentNotifications;
   autoSleep: AgentAutoSleep;
   status: DeploymentStatus;
+  // zero-knowledge encryption
+  isEncrypted: boolean;
+  encryptionVersion: string | null;
   // infra fields (null until provisioned)
   podId: string | null;
   tunnelId: string | null;

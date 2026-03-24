@@ -36,6 +36,9 @@ function DeploymentRowSkeleton() {
         <div className="h-4 w-32 bg-white/10 rounded animate-pulse" />
       </td>
       <td className="px-6 py-4">
+        <div className="h-4 w-24 bg-white/10 rounded animate-pulse" />
+      </td>
+      <td className="px-6 py-4">
         <div className="h-4 w-32 bg-white/10 rounded animate-pulse" />
       </td>
       <td className="px-6 py-4">
@@ -72,6 +75,9 @@ export function AdminDeploymentsTable({
                 Model
               </th>
               <th className="px-6 py-3 text-left font-semibold text-white/70 text-xs uppercase tracking-widest">
+                Agent
+              </th>
+              <th className="px-6 py-3 text-left font-semibold text-white/70 text-xs uppercase tracking-widest">
                 User
               </th>
               <th className="px-6 py-3 text-left font-semibold text-white/70 text-xs uppercase tracking-widest">
@@ -92,7 +98,7 @@ export function AdminDeploymentsTable({
               ))
             ) : deployments.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-white/50">
+                <td colSpan={6} className="px-6 py-8 text-center text-white/50">
                   No deployments found
                 </td>
               </tr>
@@ -111,6 +117,37 @@ export function AdminDeploymentsTable({
                         {deployment.id.slice(0, 8)}...
                       </p>
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {deployment.isEncrypted ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/25 text-xs font-medium">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect
+                            x="3"
+                            y="11"
+                            width="18"
+                            height="11"
+                            rx="2"
+                            ry="2"
+                          />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        Encrypted
+                      </span>
+                    ) : (
+                      <span className="text-white/70 text-sm truncate max-w-[140px] block">
+                        {deployment.agentName || "—"}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div>

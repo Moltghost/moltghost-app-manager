@@ -35,10 +35,12 @@ export async function createDeployment(
     mode: DeploymentMode;
     model: ModelOption;
     settings: AgentSettings;
+    isEncrypted?: boolean;
+    encryptionVersion?: string;
   },
   authToken: string,
 ): Promise<Deployment> {
-  const { mode, model, settings } = payload;
+  const { mode, model, settings, isEncrypted, encryptionVersion } = payload;
   const res = await fetch(`/api/deployments`, {
     method: "POST",
     headers: authHeaders(authToken),
@@ -50,6 +52,8 @@ export async function createDeployment(
       modelImage: model.image,
       modelMinVram: model.minVram,
       ...settings,
+      isEncrypted,
+      encryptionVersion,
     }),
   });
   if (!res.ok) throw new Error("Failed to create deployment");
@@ -64,6 +68,25 @@ export async function getDeployment(
     headers: authHeaders(authToken),
   });
   if (!res.ok) throw new Error("Failed to fetch deployment");
+  return res.json();
+}
+
+export async function updateDeployment(
+  id: string,
+  data: {
+    agentName?: string;
+    agentDescription?: string;
+    isEncrypted?: boolean;
+    encryptionVersion?: string;
+  },
+  authToken: string,
+): Promise<Deployment> {
+  const res = await fetch(`/api/deployments/${id}`, {
+    method: "PATCH",
+    headers: authHeaders(authToken),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update deployment");
   return res.json();
 }
 
