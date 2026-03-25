@@ -55,6 +55,22 @@ const GitHubIcon = () => (
   </svg>
 );
 
+const EmailIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="M22 4L12 13 2 4" />
+  </svg>
+);
+
 const LINKS: { label: string; url: string; icon: ReactNode }[] = [
   {
     label: "Website",
@@ -80,6 +96,11 @@ const LINKS: { label: string; url: string; icon: ReactNode }[] = [
     label: "GitHub",
     url: "https://github.com/moltghost",
     icon: <GitHubIcon />,
+  },
+  {
+    label: "Email",
+    url: "mailto:moltghost@gmail.com",
+    icon: <EmailIcon />,
   },
 ];
 
