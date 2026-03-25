@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
@@ -66,18 +65,11 @@ export function ReviewDeploymentStep({
 }: ReviewDeploymentStepProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
   const { getAccessToken } = useAuth();
   const { getKey } = useEncryptionKey();
 
-  const isProduction = process.env.NODE_ENV === "production";
-
   async function handleLaunch() {
-    if (isProduction) {
-      setShowModal(true);
-      return;
-    }
-    // dev: proceed with actual launch
+    // proceed with actual launch
     setLoading(true);
     setError(null);
     try {
@@ -243,35 +235,6 @@ export function ReviewDeploymentStep({
         {/* Step indicator */}
         <p className="text-sm text-white/30 tracking-wide">5 / 6</p>
       </div>
-
-      {/* Coming Soon Modal — rendered via portal so backdrop covers full screen */}
-      {showModal &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowModal(false)}
-          >
-            <div
-              className="flex flex-col items-center gap-4 rounded-3xl bg-black/60 border border-white/10 backdrop-blur-2xl px-10 py-10 max-w-sm w-full mx-4 text-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 className="text-xl font-semibold text-white">Coming Soon</h3>
-              <p className="text-sm text-white/50 leading-relaxed">
-                Public agent deployment isn&apos;t available yet. We&apos;re in
-                private testing.
-              </p>
-              <Button
-                variant="glass"
-                size="md"
-                onClick={() => setShowModal(false)}
-                className="rounded-full px-8 mt-2"
-              >
-                Got it
-              </Button>
-            </div>
-          </div>,
-          document.body,
-        )}
     </>
   );
 }
