@@ -6,6 +6,7 @@ import ClawsIcon from "@/components/icons/ClawsIcon";
 import UserIcon from "@/components/icons/UserIcon";
 import LinkIcon from "@/components/icons/LinkIcon";
 import { LinksModal } from "@/components/ui/LinksModal";
+import { MoltModal } from "@/components/ui/MoltModal";
 
 interface NavGlassProps {
   selected: string;
@@ -15,6 +16,7 @@ interface NavGlassProps {
 const NavGlass = ({ selected, onTabChange }: NavGlassProps) => {
   const [previous, setPrevious] = useState<string>("1");
   const [linksOpen, setLinksOpen] = useState(false);
+  const [moltOpen, setMoltOpen] = useState(false);
 
   const handleChange = (cOption: string) => {
     setPrevious(selected);
@@ -132,19 +134,19 @@ const NavGlass = ({ selected, onTabChange }: NavGlassProps) => {
           >
             <LinkIcon className="switcher__icon" />
           </button>
-          <a
-            href="https://dexscreener.com/solana/4gzndbrxa9flprbjtbqlr5qnkt8pnedtwubnz67z58cz"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
             className="quicklinks-pill__btn"
-            aria-label="$MOLT on DexScreener"
+            onClick={() => setMoltOpen(true)}
+            aria-label="$MOLTG"
           >
-            <span className="text-xs font-bold text-white/80">$MOLT</span>
-          </a>
+            <span className="text-xs font-bold text-white/80">$MOLTG</span>
+          </button>
         </div>
       </div>
 
       <LinksModal isOpen={linksOpen} onClose={() => setLinksOpen(false)} />
+      <MoltModal isOpen={moltOpen} onClose={() => setMoltOpen(false)} />
     </>
   );
 };
