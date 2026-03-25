@@ -10,7 +10,7 @@ import {
 import type { GpuType, ModelOption } from "@/features/deployment/types";
 
 interface SelectModelStepProps {
-  onNext: (model: ModelOption) => void;
+  onNext: (model: ModelOption, gpu: GpuType) => void;
 }
 
 const ARROW_BTN = [
@@ -23,14 +23,25 @@ const ARROW_BTN = [
   "transition-all duration-150 active:scale-95",
 ].join(" ");
 
-// Fallback GPU info shown when API is unavailable
-const FALLBACK_GPU: GpuType = {
-  id: "NVIDIA L4",
-  displayName: "NVIDIA L4",
-  memoryInGb: 24,
-  securePrice: null,
-  communityPrice: null,
-};
+// GPU IDs we want to show (first is default)
+const SHOWN_GPU_IDS = ["NVIDIA L4", "NVIDIA RTX A4500"];
+
+const FALLBACK_GPUS: GpuType[] = [
+  {
+    id: "NVIDIA L4",
+    displayName: "NVIDIA L4",
+    memoryInGb: 24,
+    securePrice: null,
+    communityPrice: null,
+  },
+  {
+    id: "NVIDIA RTX A4500",
+    displayName: "NVIDIA RTX A4500",
+    memoryInGb: 20,
+    securePrice: null,
+    communityPrice: null,
+  },
+];
 
 function priceLabel(gpu: GpuType): string {
   const price = gpu.securePrice ?? gpu.communityPrice;
@@ -38,9 +49,16 @@ function priceLabel(gpu: GpuType): string {
   return `$${price.toFixed(3)}/hr`;
 }
 
+function gpuBadge(gpu: GpuType): string {
+  if (gpu.displayName.includes("A4500")) return "A4500";
+  if (gpu.displayName.includes("L4")) return "L4";
+  return gpu.id.split(" ").pop() || gpu.id;
+}
+
 export function SelectModelStep({ onNext }: SelectModelStepProps) {
   const [models, setModels] = useState<ModelOption[]>([]);
-  const [gpu, setGpu] = useState<GpuType>(FALLBACK_GPU);
+  const [gpus, setGpus] = useState<GpuType[]>(FALLBACK_GPUS);
+  const [selectedGpuId, setSelectedGpuId] = useState(SHOWN_GPU_IDS[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { getAccessToken } = useAuth();
@@ -54,8 +72,11 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
           token ? fetchGpuTypes(token).catch(() => []) : Promise.resolve([]),
         ]);
         setModels(fetchedModels);
-        const l4 = (gpuTypes as GpuType[]).find((g) => g.id === "NVIDIA L4");
-        if (l4) setGpu(l4);
+
+        const available = SHOWN_GPU_IDS.map((id) =>
+          (gpuTypes as GpuType[]).find((g) => g.id === id),
+        ).filter(Boolean) as GpuType[];
+        if (available.length > 0) setGpus(available);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load models");
       } finally {
@@ -63,6 +84,8 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
       }
     })();
   }, [getAccessToken]);
+
+  const selectedGpu = gpus.find((g) => g.id === selectedGpuId) || gpus[0];
 
   return (
     <div className="flex flex-col items-center gap-6 sm:gap-8 px-4 py-8 sm:px-8 sm:py-10">
@@ -75,6 +98,23 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
           Select a model and infrastructure to launch your private AI agent
           using a local LLM
         </p>
+      </div>
+
+      {/* GPU selector pills */}
+      <div className="flex items-center gap-2">
+        {gpus.map((gpu) => (
+          <button
+            key={gpu.id}
+            onClick={() => setSelectedGpuId(gpu.id)}
+            className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+              selectedGpuId === gpu.id
+                ? "bg-white/15 border-white/30 text-white"
+                : "bg-white/5 border-white/10 text-white/40 hover:text-white/60"
+            }`}
+          >
+            {gpuBadge(gpu)} — {gpu.memoryInGb} GB
+          </button>
+        ))}
       </div>
 
       {/* Model grid */}
@@ -109,25 +149,28 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
               <div className="flex flex-col gap-2.5 rounded-xl bg-white/5 border border-white/10 px-4 py-3.5">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/15 text-white/80 tracking-wider">
-                    L4
+                    {gpuBadge(selectedGpu)}
                   </span>
                   <span className="text-xs font-medium text-white/70">
-                    {gpu.displayName}
+                    {selectedGpu.displayName}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-white/40">
-                    {gpu.memoryInGb} GB VRAM
+                    {selectedGpu.memoryInGb} GB VRAM
                   </span>
                   <span className="text-xs font-semibold text-white/70 tabular-nums">
-                    {priceLabel(gpu)}
+                    {priceLabel(selectedGpu)}
                   </span>
                 </div>
               </div>
 
               {/* Arrow */}
               <div className="flex justify-end pt-2">
-                <button className={ARROW_BTN} onClick={() => onNext(model)}>
+                <button
+                  className={ARROW_BTN}
+                  onClick={() => onNext(model, selectedGpu)}
+                >
                   →
                 </button>
               </div>
@@ -137,7 +180,9 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
       )}
 
       {/* Step indicator */}
-      <p className="text-sm text-white/30 tracking-wide">2 / 5</p>
+      <p className="text-sm text-white/30 tracking-wide">3 / 6</p>
+
+      {error && <ErrorDialog message={error} onClose={() => setError(null)} />}
     </div>
   );
 }

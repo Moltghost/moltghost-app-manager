@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Switch } from "@/components/ui/Switch";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
   DEFAULT_AGENT_SETTINGS,
@@ -12,40 +11,25 @@ interface ConfigureSettingsStepProps {
   onNext: (settings: AgentSettings) => void;
 }
 
-function NumberInput({
-  value,
-  onChange,
-  min = 1,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-  min?: number;
-}) {
-  return (
-    <input
-      type="number"
-      min={min}
-      value={value}
-      onChange={(e) => onChange(Math.max(min, Number(e.target.value)))}
-      className={[
-        "w-16 text-right text-xs text-white/70 bg-white/5 rounded-lg px-2 py-1",
-        "border border-white/10 focus:outline-none focus:border-white/25",
-        "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-      ].join(" ")}
-    />
-  );
-}
-
 function SectionHeader({
   title,
   subtitle,
+  comingSoon,
 }: {
   title: string;
   subtitle: string;
+  comingSoon?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-1 mb-4">
-      <h3 className="text-sm font-semibold text-white/90">{title}</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-white/90">{title}</h3>
+        {comingSoon && (
+          <span className="text-[9px] font-medium px-2 py-0.5 rounded-full bg-white/8 text-white/30 border border-white/10 uppercase tracking-wider">
+            Coming Soon
+          </span>
+        )}
+      </div>
       <p className="text-xs text-white/40">{subtitle}</p>
     </div>
   );
@@ -54,19 +38,20 @@ function SectionHeader({
 function SettingCard({
   label,
   desc,
-  right,
+  disabled,
 }: {
   label: string;
   desc: string;
-  right: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
-    <GlassCard className="flex flex-col justify-between gap-3 !rounded-2xl px-4 py-4 min-h-[110px]">
+    <GlassCard
+      className={`flex flex-col justify-between gap-3 rounded-2xl! px-4 py-4 min-h-[110px] ${disabled ? "opacity-40 pointer-events-none" : ""}`}
+    >
       <div className="flex flex-col gap-1.5 flex-1">
         <span className="text-xs font-semibold text-white/80">{label}</span>
         <span className="text-[11px] text-white/40 leading-snug">{desc}</span>
       </div>
-      <div className="flex justify-end">{right}</div>
     </GlassCard>
   );
 }
@@ -93,55 +78,6 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
   const [settings, setSettings] = useState<AgentSettings>(
     DEFAULT_AGENT_SETTINGS,
   );
-
-  function toggleSkill(id: string) {
-    setSettings((prev) => ({
-      ...prev,
-      skills: prev.skills.includes(id)
-        ? prev.skills.filter((s) => s !== id)
-        : [...prev.skills, id],
-    }));
-  }
-
-  function setMemory<K extends keyof AgentSettings["memory"]>(
-    key: K,
-    value: AgentSettings["memory"][K],
-  ) {
-    setSettings((prev) => ({
-      ...prev,
-      memory: { ...prev.memory, [key]: value },
-    }));
-  }
-
-  function setBehavior<K extends keyof AgentSettings["agentBehavior"]>(
-    key: K,
-    value: AgentSettings["agentBehavior"][K],
-  ) {
-    setSettings((prev) => ({
-      ...prev,
-      agentBehavior: { ...prev.agentBehavior, [key]: value },
-    }));
-  }
-
-  function setNotifications<K extends keyof AgentSettings["notifications"]>(
-    key: K,
-    value: AgentSettings["notifications"][K],
-  ) {
-    setSettings((prev) => ({
-      ...prev,
-      notifications: { ...prev.notifications, [key]: value },
-    }));
-  }
-
-  function setAutoSleep<K extends keyof AgentSettings["autoSleep"]>(
-    key: K,
-    value: AgentSettings["autoSleep"][K],
-  ) {
-    setSettings((prev) => ({
-      ...prev,
-      autoSleep: { ...prev.autoSleep, [key]: value },
-    }));
-  }
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 py-8 sm:px-8 sm:py-10 w-full">
@@ -203,11 +139,12 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
           </div>
         </div>
 
-        {/* Skills */}
+        {/* Skills — Coming Soon */}
         <div>
           <SectionHeader
             title="Skills"
             subtitle="Enable capabilities that allow your agent to interact with tools, services, and external systems."
+            comingSoon
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {SKILL_OPTIONS.map((skill) => (
@@ -215,169 +152,107 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
                 key={skill.id}
                 label={skill.label}
                 desc={skill.desc}
-                right={
-                  <Switch
-                    checked={settings.skills.includes(skill.id)}
-                    onChange={() => toggleSkill(skill.id)}
-                  />
-                }
+                disabled
               />
             ))}
           </div>
         </div>
 
-        {/* Private Memory */}
+        {/* Private Memory — Coming Soon */}
         <div>
           <SectionHeader
             title="Private Memory"
             subtitle="Allow your agent to securely store and recall information across sessions using encrypted storage."
+            comingSoon
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SettingCard
               label="Enable Private Memory"
               desc="Allow your agent to securely store and recall information across sessions using encrypted storage."
-              right={
-                <Switch
-                  checked={settings.memory.enablePrivateMemory}
-                  onChange={(v) => setMemory("enablePrivateMemory", v)}
-                />
-              }
+              disabled
             />
             <SettingCard
               label="Persistent Memory"
               desc="Keep memory stored permanently so the agent can recall it after restarts."
-              right={
-                <Switch
-                  checked={settings.memory.persistentMemory}
-                  onChange={(v) => setMemory("persistentMemory", v)}
-                />
-              }
+              disabled
             />
             <SettingCard
               label="Encryption"
               desc="All memory is encrypted to ensure privacy and secure storage."
-              right={
-                <Switch
-                  checked={settings.memory.encryption}
-                  onChange={(v) => setMemory("encryption", v)}
-                />
-              }
+              disabled
             />
           </div>
         </div>
 
-        {/* Agent Behavior */}
+        {/* Agent Behavior — Coming Soon */}
         <div>
           <SectionHeader
             title="Agent Behavior"
             subtitle="Control how the agent executes tasks and responds during runtime."
+            comingSoon
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SettingCard
               label="Autonomous Mode"
               desc="Allow the agent to execute tasks automatically without manual approval."
-              right={
-                <Switch
-                  checked={settings.agentBehavior.autonomousMode}
-                  onChange={(v) => setBehavior("autonomousMode", v)}
-                />
-              }
+              disabled
             />
             <SettingCard
               label="Task Timeout"
               desc="Set the maximum time a task can run before it is stopped."
-              right={
-                <div className="flex items-center gap-1.5">
-                  <NumberInput
-                    value={settings.agentBehavior.taskTimeout}
-                    onChange={(v) => setBehavior("taskTimeout", v)}
-                  />
-                  <span className="text-xs text-white/30">sec</span>
-                </div>
-              }
+              disabled
             />
             <SettingCard
               label="Max Concurrent Tasks"
               desc="Limit how many tasks the agent can process at the same time."
-              right={
-                <NumberInput
-                  value={settings.agentBehavior.maxConcurrentTasks}
-                  onChange={(v) => setBehavior("maxConcurrentTasks", v)}
-                />
-              }
+              disabled
             />
           </div>
         </div>
 
-        {/* Notification */}
+        {/* Notification — Coming Soon */}
         <div>
           <SectionHeader
             title="Notification"
             subtitle="Configure how your agent sends updates and alerts when tasks run or complete."
+            comingSoon
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SettingCard
               label="Webhook Notifications"
               desc="Send task updates to an external service using a webhook endpoint."
-              right={
-                <Switch
-                  checked={settings.notifications.webhookNotifications}
-                  onChange={(v) => setNotifications("webhookNotifications", v)}
-                />
-              }
+              disabled
             />
             <SettingCard
               label="Email Alerts"
               desc="Receive email notifications when tasks complete or encounter errors."
-              right={
-                <Switch
-                  checked={settings.notifications.emailAlerts}
-                  onChange={(v) => setNotifications("emailAlerts", v)}
-                />
-              }
+              disabled
             />
             <SettingCard
               label="Task Reports"
               desc="Generate summary reports for completed tasks and activities."
-              right={
-                <Switch
-                  checked={settings.notifications.taskReports}
-                  onChange={(v) => setNotifications("taskReports", v)}
-                />
-              }
+              disabled
             />
           </div>
         </div>
 
-        {/* Auto Sleep */}
+        {/* Auto Sleep — Coming Soon */}
         <div>
           <SectionHeader
             title="Auto Sleep"
             subtitle="Automatically sleep the GPU when the agent is idle to reduce cost."
+            comingSoon
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <SettingCard
               label="Enable Auto Sleep"
               desc="Sleep the GPU when the agent is idle to save cost."
-              right={
-                <Switch
-                  checked={settings.autoSleep.enableAutoSleep}
-                  onChange={(v) => setAutoSleep("enableAutoSleep", v)}
-                />
-              }
+              disabled
             />
             <SettingCard
               label="Idle Timeout"
               desc="Set how long the agent must be idle before the GPU sleeps."
-              right={
-                <div className="flex items-center gap-1.5">
-                  <NumberInput
-                    value={settings.autoSleep.idleTimeout}
-                    onChange={(v) => setAutoSleep("idleTimeout", v)}
-                  />
-                  <span className="text-xs text-white/30">min</span>
-                </div>
-              }
+              disabled
             />
           </div>
         </div>
@@ -397,7 +272,7 @@ export function ConfigureSettingsStep({ onNext }: ConfigureSettingsStepProps) {
       </Button>
 
       {/* Step indicator */}
-      <p className="text-sm text-white/30 tracking-wide">3 / 5</p>
+      <p className="text-sm text-white/30 tracking-wide">4 / 6</p>
     </div>
   );
 }

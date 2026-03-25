@@ -9,7 +9,12 @@ export default async function handler(
   const auth = req.headers.authorization || "";
   try {
     const backendRes = await fetch(`${API_URL}/api/users/me`, {
-      headers: { Authorization: auth },
+      method: req.method || "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: auth,
+      },
+      ...(req.method === "PATCH" ? { body: JSON.stringify(req.body) } : {}),
     });
     const data = await backendRes.json();
     res.status(backendRes.status).json(data);

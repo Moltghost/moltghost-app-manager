@@ -19,6 +19,8 @@ interface ReviewDeploymentStepProps {
   mode: DeploymentMode;
   model: ModelOption;
   settings: AgentSettings;
+  runpodApiKey: string;
+  gpuType?: string;
   onLaunched: (deployment: Deployment) => void;
 }
 
@@ -58,6 +60,8 @@ export function ReviewDeploymentStep({
   mode,
   model,
   settings,
+  runpodApiKey,
+  gpuType,
   onLaunched,
 }: ReviewDeploymentStepProps) {
   const [loading, setLoading] = useState(false);
@@ -99,6 +103,8 @@ export function ReviewDeploymentStep({
           settings: encryptedSettings,
           isEncrypted: true,
           encryptionVersion: "v1",
+          ...(runpodApiKey ? { runpodApiKey } : {}),
+          ...(gpuType ? { gpuType } : {}),
         },
         token,
       );
@@ -235,7 +241,7 @@ export function ReviewDeploymentStep({
         </Button>
 
         {/* Step indicator */}
-        <p className="text-sm text-white/30 tracking-wide">4 / 5</p>
+        <p className="text-sm text-white/30 tracking-wide">5 / 6</p>
       </div>
 
       {/* Coming Soon Modal — rendered via portal so backdrop covers full screen */}

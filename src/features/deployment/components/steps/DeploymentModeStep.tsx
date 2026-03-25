@@ -160,7 +160,7 @@ export function DeploymentModeStep({ onNext }: DeploymentModeStepProps) {
       </div>
 
       {/* Step indicator */}
-      <p className="text-sm text-white/30 tracking-wide">1 / 5</p>
+      <p className="text-sm text-white/30 tracking-wide">2 / 6</p>
     </div>
   );
 }

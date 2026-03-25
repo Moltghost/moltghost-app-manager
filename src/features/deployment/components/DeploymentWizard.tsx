@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { WelcomeStep } from "./steps/WelcomeStep";
+import { SelectProviderStep } from "./steps/SelectProviderStep";
 import { DeploymentModeStep } from "./steps/DeploymentModeStep";
 import { SelectModelStep } from "./steps/SelectModelStep";
 import { ConfigureSettingsStep } from "./steps/ConfigureSettingsStep";
@@ -15,14 +16,23 @@ import type {
   ModelOption,
   AgentSettings,
   Deployment,
+  GpuType,
 } from "@/features/deployment/types";
 import { DEFAULT_AGENT_SETTINGS } from "@/features/deployment/types";
 
-type Step = "welcome" | "mode" | "model" | "settings" | "review" | "deploying";
+type Step =
+  | "welcome"
+  | "provider"
+  | "mode"
+  | "model"
+  | "settings"
+  | "review"
+  | "deploying";
 
 const WIDE_STEPS: Step[] = ["mode", "model", "settings"];
 const BACK_MAP: Partial<Record<Step, Step>> = {
-  mode: "welcome",
+  provider: "welcome",
+  mode: "provider",
   model: "mode",
   settings: "model",
   review: "settings",
@@ -73,8 +83,10 @@ interface DeploymentWizardProps {
 
 export function DeploymentWizard({ onAgentLive }: DeploymentWizardProps) {
   const [step, setStep] = useState<Step>("welcome");
+  const [runpodApiKey, setRunpodApiKey] = useState("");
   const [mode, setMode] = useState<DeploymentMode | null>(null);
   const [model, setModel] = useState<ModelOption | null>(null);
+  const [selectedGpu, setSelectedGpu] = useState<GpuType | null>(null);
   const [settings, setSettings] = useState<AgentSettings>(
     DEFAULT_AGENT_SETTINGS,
   );
@@ -128,7 +140,18 @@ export function DeploymentWizard({ onAgentLive }: DeploymentWizardProps) {
             <BackArrow onClick={() => setStep(BACK_MAP[step]!)} />
           )}
 
-          {step === "welcome" && <WelcomeStep onNext={() => setStep("mode")} />}
+          {step === "welcome" && (
+            <WelcomeStep onNext={() => setStep("provider")} />
+          )}
+
+          {step === "provider" && (
+            <SelectProviderStep
+              onNext={(key) => {
+                setRunpodApiKey(key);
+                setStep("mode");
+              }}
+            />
+          )}
 
           {step === "mode" && (
             <DeploymentModeStep
@@ -141,8 +164,9 @@ export function DeploymentWizard({ onAgentLive }: DeploymentWizardProps) {
 
           {step === "model" && (
             <SelectModelStep
-              onNext={(selected) => {
+              onNext={(selected, gpu) => {
                 setModel(selected);
+                setSelectedGpu(gpu);
                 setStep("settings");
               }}
             />
@@ -162,6 +186,8 @@ export function DeploymentWizard({ onAgentLive }: DeploymentWizardProps) {
               mode={mode}
               model={model}
               settings={settings}
+              runpodApiKey={runpodApiKey}
+              gpuType={selectedGpu?.id}
               onLaunched={(created) => {
                 setDeployment(created);
                 setStep("deploying");

@@ -119,6 +119,8 @@ export interface Deployment {
   agentDomain: string | null;
   dnsRecordId: string | null;
   gatewayToken: string | null;
+  // "user-provided" if user supplied their own RunPod API key, null otherwise
+  runpodApiKey: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -190,7 +190,7 @@ export function DeployingStep({
           </div>
 
           {/* Step indicator */}
-          <p className="text-sm text-white/50 tracking-wide">5 / 5</p>
+          <p className="text-sm text-white/50 tracking-wide">6 / 6</p>
         </div>
       </div>
 

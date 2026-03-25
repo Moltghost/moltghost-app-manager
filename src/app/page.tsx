@@ -10,24 +10,6 @@ import { AgentsPanel } from "@/features/agents/components/AgentsPanel";
 
 import type { Deployment } from "@/features/deployment/types";
 
-const TAB_LABELS: Record<string, string> = {
-  "3": "Wallet",
-  "4": "Settings",
-};
-
-function ComingSoonCard({ label }: { label: string }) {
-  return (
-    <GlassCard className="rounded-3xl! overflow-hidden w-full max-w-sm">
-      <div className="flex flex-col items-center justify-center gap-3 px-8 py-10 sm:px-16 sm:py-14">
-        <p className="text-2xl font-semibold text-white/70 tracking-tight">
-          Coming Soon
-        </p>
-        <p className="text-sm text-white/30">{label} is not available yet.</p>
-      </div>
-    </GlassCard>
-  );
-}
-
 export default function Home() {
   const [activeTab, setActiveTab] = useState("1");
   const [pendingAgent, setPendingAgent] = useState<Deployment | null>(null);
@@ -42,7 +24,7 @@ export default function Home() {
       <FullScreenScene>
         <NavGlass selected={activeTab} onTabChange={setActiveTab} />
         <div className="relative z-20 w-full min-h-screen flex flex-col items-center justify-start pt-38 pb-12 sm:py-38 px-4 sm:px-0">
-          {activeTab === "5" ? (
+          {activeTab === "3" ? (
             <GlassCard className="rounded-3xl! overflow-hidden">
               <UserPanel />
             </GlassCard>
@@ -54,9 +36,7 @@ export default function Home() {
               initialAgent={pendingAgent}
               onInitialAgentConsumed={() => setPendingAgent(null)}
             />
-          ) : (
-            <ComingSoonCard label={TAB_LABELS[activeTab] ?? "This page"} />
-          )}
+          ) : null}
         </div>
       </FullScreenScene>
     </AuthGate>

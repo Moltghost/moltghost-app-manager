@@ -140,16 +140,27 @@ body:has(input[value="dim"]:checked) {
 
 /* ─── NavGlass component styles ─── */
 
-.switcher {
+.quicknav-wrapper {
   position: fixed;
   top: 60px;
   left: 50%;
   translate: -50%;
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .quicknav-wrapper {
+    top: 40px;
+  }
+}
+
+.switcher {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  width: 396px;
-  max-width: 396px;
+  width: fit-content;
   height: 70px;
   box-sizing: border-box;
   padding: 8px 12px 10px;
@@ -223,12 +234,6 @@ body:has(input[value="dim"]:checked) {
   transition:
     background-color 400ms cubic-bezier(1, 0, 0.4, 1),
     box-shadow 400ms cubic-bezier(1, 0, 0.4, 1);
-}
-
-@media (min-width: 640px) {
-  .switcher {
-    top: 40px;
-  }
 }
 
 .switcher__legend {
@@ -410,6 +415,119 @@ body:has(input[value="dim"]:checked) {
     box-shadow 400ms cubic-bezier(1, 0, 0.4, 1),
     translate 400ms cubic-bezier(1, 0, 0.4, 1);
   animation: scaleToggle 440ms ease;
+}
+
+.switcher[data-selected="5"]::after {
+  translate: 304px 0;
+  transform-origin: left;
+  transition:
+    background-color 400ms cubic-bezier(1, 0, 0.4, 1),
+    box-shadow 400ms cubic-bezier(1, 0, 0.4, 1),
+    translate 400ms cubic-bezier(1, 0, 0.4, 1);
+  animation: scaleToggle 440ms ease;
+}
+
+/* ─── Quick-links pill ─── */
+
+.quicklinks-pill {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 70px;
+  padding: 8px 6px 10px;
+  border-radius: 99em;
+  background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+  backdrop-filter: blur(8px) saturate(var(--saturation));
+  -webkit-backdrop-filter: blur(8px) saturate(var(--saturation));
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--c-light) calc(var(--glass-reflex-light) * 10%),
+        transparent
+      ),
+    inset 1.8px 3px 0px -2px
+      color-mix(
+        in srgb,
+        var(--c-light) calc(var(--glass-reflex-light) * 90%),
+        transparent
+      ),
+    inset -2px -2px 0px -2px
+      color-mix(
+        in srgb,
+        var(--c-light) calc(var(--glass-reflex-light) * 80%),
+        transparent
+      ),
+    inset -3px -8px 1px -6px
+      color-mix(
+        in srgb,
+        var(--c-light) calc(var(--glass-reflex-light) * 60%),
+        transparent
+      ),
+    inset -0.3px -1px 4px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 12%),
+        transparent
+      ),
+    inset -1.5px 2.5px 0px -2px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 20%),
+        transparent
+      ),
+    inset 0px 3px 4px -2px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 20%),
+        transparent
+      ),
+    inset 2px -6.5px 1px -4px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 10%),
+        transparent
+      ),
+    0px 1px 5px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 10%),
+        transparent
+      ),
+    0px 6px 16px 0px
+      color-mix(
+        in srgb,
+        var(--c-dark) calc(var(--glass-reflex-dark) * 8%),
+        transparent
+      );
+  transition:
+    background-color 400ms cubic-bezier(1, 0, 0.4, 1),
+    box-shadow 400ms cubic-bezier(1, 0, 0.4, 1);
+}
+
+.quicklinks-pill__btn {
+  --c: var(--c-content);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 100%;
+  border: none;
+  background: none;
+  border-radius: 99em;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 160ms;
+  text-decoration: none;
+  color: inherit;
+}
+
+.quicklinks-pill__btn:hover {
+  --c: var(--c-action);
+}
+
+.quicklinks-pill__btn:hover .switcher__icon {
+  scale: 1.2;
 }
 
 @keyframes scaleToggle {
