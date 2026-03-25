@@ -1,38 +1,36 @@
 "use client";
-import { PrivyProvider } from "@privy-io/react-auth";
+import { useMemo } from "react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { SnackbarProvider } from "notistack";
+import { AuthProvider } from "./AuthProvider";
+
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 export function AppPrivyProvider({ children }: { children: React.ReactNode }) {
+  const endpoint =
+    process.env.NEXT_PUBLIC_SOLANA_RPC_URL ??
+    "https://api.mainnet-beta.solana.com";
+  const wallets = useMemo(() => [], []);
+
   return (
-    <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
-      config={{
-        appearance: {
-          theme: "dark",
-          accentColor: "#E9DFC8",
-        },
-        loginMethods: ["email", "google"],
-        embeddedWallets: {
-          createOnLogin: "off",
-          solana: {
-            createOnLogin: "all-users",
-          },
-        },
-        solanaClusters: [
-          {
-            name: "mainnet-beta",
-            rpcUrl: process.env.NEXT_PUBLIC_SOLANA_RPC_URL!,
-          },
-        ],
-      }}
-    >
-      <SnackbarProvider
-        maxSnack={3}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        {children}
-      </SnackbarProvider>
-    </PrivyProvider>
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <AuthProvider>
+            <SnackbarProvider
+              maxSnack={3}
+              autoHideDuration={5000}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+              {children}
+            </SnackbarProvider>
+          </AuthProvider>
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }

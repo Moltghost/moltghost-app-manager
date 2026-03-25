@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import { GlassCard } from "@/components/ui/GlassCard";
 import MoltghostIcon from "@/components/icons/MoltghostIcon";
 import { getDeployments } from "@/features/deployment/services/deploymentService";
@@ -177,7 +177,7 @@ export function AgentsPanel({
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<Deployment | null>(null);
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const { getKey } = useEncryptionKey();
 

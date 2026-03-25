@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { useSolanaWallets } from "@privy-io/react-auth";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { deriveEncryptionKey } from "../lib/crypto";
 
 /**
@@ -16,7 +16,7 @@ import { deriveEncryptionKey } from "../lib/crypto";
  *   const encrypted = await encrypt("secret", key);
  */
 export function useEncryptionKey() {
-  const { wallets } = useSolanaWallets();
+  const { signMessage, publicKey } = useWallet();
   const keyRef = useRef<CryptoKey | null>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -24,19 +24,18 @@ export function useEncryptionKey() {
     // Return cached key if already derived
     if (keyRef.current) return keyRef.current;
 
-    const wallet = wallets[0];
-    if (!wallet) {
+    if (!publicKey || !signMessage) {
       throw new Error("No Solana wallet available for encryption");
     }
 
     const key = await deriveEncryptionKey((message: Uint8Array) =>
-      wallet.signMessage(message),
+      signMessage(message),
     );
 
     keyRef.current = key;
     setIsReady(true);
     return key;
-  }, [wallets]);
+  }, [signMessage, publicKey]);
 
   return { getKey, isReady };
 }

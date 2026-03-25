@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
-import { useSolanaWallets } from "@privy-io/react-auth/solana";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/Button";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -17,8 +17,8 @@ interface BackendUser {
 }
 
 export function UserPanel() {
-  const { logout, getAccessToken } = usePrivy();
-  const { wallets } = useSolanaWallets();
+  const { logout, getAccessToken } = useAuth();
+  const { publicKey } = useWallet();
   const [profile, setProfile] = useState<BackendUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -104,35 +104,31 @@ export function UserPanel() {
       {/* Connected wallets */}
       <div className="flex flex-col gap-2">
         <p className="text-[11px] font-semibold text-white/50 uppercase tracking-widest">
-          Connected Wallets
+          Connected Wallet
         </p>
-        {wallets.length === 0 ? (
+        {!publicKey ? (
           <p className="text-xs text-white/50">No wallet connected</p>
         ) : (
           <div className="flex flex-col gap-2">
-            {wallets.map((wallet) => (
-              <button
-                key={wallet.address}
-                onClick={() => handleCopyAddress(wallet.address)}
-                className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white/15 hover:border-white/25 transition-colors w-full text-left group"
-                title="Click to copy address"
-              >
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-[10px] text-white/60 capitalize">
-                    {wallet.walletClientType ?? "privy"}
-                  </span>
-                  <span className="text-xs font-mono text-white/90 truncate group-hover:hidden">
-                    {wallet.address.slice(0, 4)}…{wallet.address.slice(-4)}
-                  </span>
-                  <span className="text-xs font-mono text-blue-400 hidden group-hover:inline">
-                    {copiedAddress === wallet.address ? "✓ Copied!" : "📋 Copy"}
-                  </span>
-                </div>
-                <span className="text-[10px] text-white/55 shrink-0">
-                  Solana
+            <button
+              onClick={() => handleCopyAddress(publicKey.toBase58())}
+              className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white/15 hover:border-white/25 transition-colors w-full text-left group"
+              title="Click to copy address"
+            >
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-[10px] text-white/60">Solana</span>
+                <span className="text-xs font-mono text-white/90 truncate group-hover:hidden">
+                  {publicKey.toBase58().slice(0, 4)}…
+                  {publicKey.toBase58().slice(-4)}
                 </span>
-              </button>
-            ))}
+                <span className="text-xs font-mono text-blue-400 hidden group-hover:inline">
+                  {copiedAddress === publicKey.toBase58()
+                    ? "✓ Copied!"
+                    : "📋 Copy"}
+                </span>
+              </div>
+              <span className="text-[10px] text-white/55 shrink-0">Solana</span>
+            </button>
           </div>
         )}
       </div>

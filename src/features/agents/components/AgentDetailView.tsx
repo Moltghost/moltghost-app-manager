@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import MoltghostIcon from "@/components/icons/MoltghostIcon";
 import { useSnackbar } from "notistack";
 import type { Deployment } from "@/features/deployment/types";
@@ -179,7 +179,7 @@ export function AgentDetailView({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
   const [authToken, setAuthToken] = useState("");
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const isRunning = deployment.status === "running";
 

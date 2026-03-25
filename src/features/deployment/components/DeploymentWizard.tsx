@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { DeploymentModeStep } from "./steps/DeploymentModeStep";
@@ -81,7 +81,7 @@ export function DeploymentWizard({ onAgentLive }: DeploymentWizardProps) {
   const [deployment, setDeployment] = useState<Deployment | null>(null);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
 
   // On mount: check if user already has an active deployment
   useEffect(() => {

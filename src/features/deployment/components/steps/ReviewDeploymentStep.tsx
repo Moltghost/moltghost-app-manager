@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -63,7 +63,7 @@ export function ReviewDeploymentStep({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
   const { getKey } = useEncryptionKey();
 
   const isProduction = process.env.NODE_ENV === "production";

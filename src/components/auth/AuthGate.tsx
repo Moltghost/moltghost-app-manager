@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useEffect, useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useAuth } from "@/providers/AuthProvider";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
 import MoltghostIcon from "@/components/icons/MoltghostIcon";
@@ -8,11 +10,24 @@ import { FullScreenScene } from "@/components/layout/FullScreenScene";
 import NavGlass from "@/components/layout/NavGlass";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login } = useAuth();
+  const { connected } = useWallet();
+  const { setVisible } = useWalletModal();
   const [tab, setTab] = useState("1");
+  const [loggingIn, setLoggingIn] = useState(false);
 
-  // Still loading Privy
-  if (!ready) {
+  // Auto-login when wallet connects but not yet authenticated
+  useEffect(() => {
+    if (connected && !authenticated && ready && !loggingIn) {
+      setLoggingIn(true);
+      login()
+        .catch(() => {})
+        .finally(() => setLoggingIn(false));
+    }
+  }, [connected, authenticated, ready, login, loggingIn]);
+
+  // Still loading
+  if (!ready || loggingIn) {
     return (
       <FullScreenScene>
         <div className="flex items-center justify-center min-h-screen">
@@ -37,17 +52,17 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
                   Welcome to MoltGhost
                 </h1>
                 <p className="text-sm text-white/40 leading-relaxed max-w-xs">
-                  Sign in to deploy and manage your AI agents.
+                  Connect your wallet to deploy and manage your AI agents.
                 </p>
               </div>
 
               <Button
                 variant="glass"
                 size="md"
-                onClick={login}
+                onClick={() => setVisible(true)}
                 className="rounded-full px-8 mt-1 w-full"
               >
-                Sign In
+                Connect Wallet
               </Button>
             </div>
           </GlassCard>

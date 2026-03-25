@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import type { AdminUser, AdminDeployment, AdminStats } from "../types";
 import {
   fetchAdminUsers,
@@ -14,7 +14,7 @@ import { AdminDeploymentsTable } from "./AdminDeploymentsTable";
 import { AlertError } from "../../../components/ui/AlertError";
 
 export function AdminDashboard() {
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [deployments, setDeployments] = useState<AdminDeployment[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);

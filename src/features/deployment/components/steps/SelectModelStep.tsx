@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import {
@@ -43,7 +43,7 @@ export function SelectModelStep({ onNext }: SelectModelStepProps) {
   const [gpu, setGpu] = useState<GpuType>(FALLBACK_GPU);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
 
   useEffect(() => {
     (async () => {

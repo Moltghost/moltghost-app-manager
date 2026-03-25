@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import CoffeeIcon from "@/components/icons/CoffeeIcon";
 import { ConsoleLogsModal } from "../ConsoleLogsModal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -32,7 +32,7 @@ export function DeployingStep({
   const [token, setToken] = useState<string>("");
   const [cancelling, setCancelling] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleCancel = async () => {

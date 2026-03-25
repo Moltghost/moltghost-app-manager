@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAuth } from "@/providers/AuthProvider";
 import { useSnackbar } from "notistack";
 import { Switch } from "@/components/ui/Switch";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -205,7 +205,7 @@ function GeneralSection({
   const [desc, setDesc] = useState(deployment.agentDescription ?? "");
   const [saving, setSaving] = useState(false);
   const [decrypting, setDecrypting] = useState(deployment.isEncrypted);
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const { getKey } = useEncryptionKey();
 
