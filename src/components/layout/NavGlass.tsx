@@ -5,9 +5,7 @@ import HomeIcon from "@/components/icons/HomeIcon";
 import ClawsIcon from "@/components/icons/ClawsIcon";
 import UserIcon from "@/components/icons/UserIcon";
 import LinkIcon from "@/components/icons/LinkIcon";
-import PumpFunLogo from "@/components/icons/PumpFunLogo";
 import { LinksModal } from "@/components/ui/LinksModal";
-import { PumpFunModal } from "@/components/ui/PumpFunModal";
 
 interface NavGlassProps {
   selected: string;
@@ -17,7 +15,6 @@ interface NavGlassProps {
 const NavGlass = ({ selected, onTabChange }: NavGlassProps) => {
   const [previous, setPrevious] = useState<string>("1");
   const [linksOpen, setLinksOpen] = useState(false);
-  const [pumpOpen, setPumpOpen] = useState(false);
 
   const handleChange = (cOption: string) => {
     setPrevious(selected);
@@ -135,19 +132,19 @@ const NavGlass = ({ selected, onTabChange }: NavGlassProps) => {
           >
             <LinkIcon className="switcher__icon" />
           </button>
-          <button
-            type="button"
+          <a
+            href="https://dexscreener.com/solana/4gzndbrxa9flprbjtbqlr5qnkt8pnedtwubnz67z58cz"
+            target="_blank"
+            rel="noopener noreferrer"
             className="quicklinks-pill__btn"
-            onClick={() => setPumpOpen(true)}
-            aria-label="PumpFun"
+            aria-label="$MOLT on DexScreener"
           >
-            <PumpFunLogo className="switcher__icon" />
-          </button>
+            <span className="text-xs font-bold text-white/80">$MOLT</span>
+          </a>
         </div>
       </div>
 
       <LinksModal isOpen={linksOpen} onClose={() => setLinksOpen(false)} />
-      <PumpFunModal isOpen={pumpOpen} onClose={() => setPumpOpen(false)} />
     </>
   );
 };

@@ -61,7 +61,7 @@ const circularStd = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MOLTGHOST App Manager",
+  title: "Moltghost DApp",
   description: "Deploy and manage your AI-powered applications",
 };
 
