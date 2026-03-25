@@ -108,11 +108,6 @@ const LINKS: { label: string; url: string; icon: ReactNode }[] = [
     url: "https://medium.com/@moltghost/",
     icon: <MediumIcon />,
   },
-  {
-    label: "Email",
-    url: "mailto:hello@moltghost.io",
-    icon: <EmailIcon />,
-  },
 ];
 
 export function LinksModal({ isOpen, onClose }: LinksModalProps) {
