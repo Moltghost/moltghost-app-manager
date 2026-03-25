@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { AppPrivyProvider } from "@/providers/PrivyProvider";
+import { AppWalletProvider } from "@/providers/WalletProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -75,7 +75,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${circularStd.variable} antialiased`}
       >
-        <AppPrivyProvider>{children}</AppPrivyProvider>
+        <AppWalletProvider>{children}</AppWalletProvider>
         <div className="fixed top-4 left-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[11px] text-white/40 select-none pointer-events-none">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400/70 animate-pulse" />
           In Development

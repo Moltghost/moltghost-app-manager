@@ -8,7 +8,7 @@ A web-based deployment manager for spinning up AI agent instances on GPU infrast
 
 ## Features
 
-- **Wallet-based auth** via [Privy](https://privy.io) — no username/password required
+- **Wallet-based auth** via Solana wallet adapter — no username/password required
 - **5-step deployment wizard**
   1. Welcome / overview
   2. Choose deployment mode — *Dedicated*, *Shared*, or *External*
@@ -28,8 +28,8 @@ A web-based deployment manager for spinning up AI agent instances on GPU infrast
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript 5 |
 | Styling | Tailwind CSS v4 |
-| Auth | Privy (wallet / social login) |
-| Database | Neon (serverless Postgres) |
+| Auth | Solana wallet adapter + JWT |
+| Database | PostgreSQL (via pg driver) |
 | ORM | Drizzle ORM |
 | GPU infra | RunPod GraphQL API |
 | Deployment | Vercel |
@@ -49,12 +49,11 @@ npm install
 Create a `.env.local` file in the root:
 
 ```env
-# Privy
-NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
-PRIVY_APP_SECRET=your_privy_app_secret
+# Backend API
+NEXT_PUBLIC_API_URL=http://localhost:4000
 
-# Neon Postgres
-DATABASE_URL=your_neon_connection_string
+# Solana RPC
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 
 # RunPod
 RUNPOD_API_KEY=your_runpod_api_key
