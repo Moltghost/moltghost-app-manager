@@ -118,6 +118,7 @@ export interface Deployment {
   tunnelToken: string | null;
   agentDomain: string | null;
   dnsRecordId: string | null;
+  gatewayToken: string | null;
   createdAt: string;
   updatedAt: string;
 }

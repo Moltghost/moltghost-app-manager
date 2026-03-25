@@ -8,9 +8,27 @@
 // Format: base64(iv + tag + ciphertext)
 // =============================================================================
 
-const SIGN_MESSAGE = "moltghost-encryption-key-v1";
+export const SIGN_MESSAGE = "moltghost-encryption-key-v1";
 const IV_LENGTH = 12; // recommended for AES-GCM
 const TAG_LENGTH = 16; // 128-bit auth tag
+
+/**
+ * Derive an AES-256-GCM CryptoKey from raw signature bytes (no wallet interaction).
+ */
+export async function deriveKeyFromSignatureBytes(
+  signatureBytes: Uint8Array,
+): Promise<CryptoKey> {
+  const sigBuffer = new Uint8Array(signatureBytes).buffer as ArrayBuffer;
+  const keyMaterial = await crypto.subtle.digest("SHA-256", sigBuffer);
+
+  return crypto.subtle.importKey(
+    "raw",
+    keyMaterial,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
 
 /**
  * Derive an AES-256-GCM CryptoKey from a Solana wallet signature.
@@ -22,18 +40,7 @@ export async function deriveEncryptionKey(
   const encoder = new TextEncoder();
   const messageBytes = encoder.encode(SIGN_MESSAGE);
   const signature = await signMessage(messageBytes);
-
-  // SHA-256 hash the signature to get exactly 32 bytes for AES-256
-  const sigBuffer = new Uint8Array(signature).buffer as ArrayBuffer;
-  const keyMaterial = await crypto.subtle.digest("SHA-256", sigBuffer);
-
-  return crypto.subtle.importKey(
-    "raw",
-    keyMaterial,
-    { name: "AES-GCM" },
-    false,
-    ["encrypt", "decrypt"],
-  );
+  return deriveKeyFromSignatureBytes(new Uint8Array(signature));
 }
 
 /**

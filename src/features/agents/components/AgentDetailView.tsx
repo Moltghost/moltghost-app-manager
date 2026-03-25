@@ -175,7 +175,6 @@ export function AgentDetailView({
   onBack,
   onUpdated,
 }: AgentDetailViewProps) {
-  const [message, setMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
   const [authToken, setAuthToken] = useState("");
@@ -305,64 +304,36 @@ export function AgentDetailView({
               <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
                 Welcome back
               </h1>
-              <p className="text-sm text-white/40">
-                How can i help you today ?
-              </p>
+              <p className="text-sm text-white/40">Chatbot UI coming soon</p>
             </div>
 
-            {/* ── Chat Input ─────────────────────────────────────────────── */}
-            <div className="w-full max-w-2xl mx-auto">
-              <div
-                className="relative rounded-2xl overflow-hidden"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(30,30,30,0.6) 0%, rgba(40,40,40,0.35) 100%)",
-                }}
-              >
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ask your agent or assign a task..."
-                  rows={3}
-                  className="w-full bg-transparent text-sm text-white/80 placeholder:text-white/25 px-5 pt-4 pb-12 resize-none outline-none"
-                />
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                  <button className="flex items-center justify-center w-8 h-8 rounded-full bg-white/8 hover:bg-white/16 border border-white/10 transition-colors cursor-pointer text-white/50 hover:text-white/80">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                  </button>
-                  <button
-                    disabled={!message.trim()}
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-white/90 hover:bg-white disabled:bg-white/20 transition-colors cursor-pointer disabled:cursor-not-allowed"
+            {/* ── Open Dashboard ──────────────────────────────────────────── */}
+            {deployment.agentDomain && (
+              <div className="w-full max-w-2xl mx-auto flex justify-center">
+                <a
+                  href={`https://${deployment.agentDomain}${deployment.gatewayToken ? `?token=${deployment.gatewayToken}` : ""}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 px-7 py-3 rounded-full bg-white/10 hover:bg-white/16 border border-white/12 hover:border-white/20 text-white/80 hover:text-white transition-all text-sm font-medium tracking-tight"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={message.trim() ? "#000" : "rgba(255,255,255,0.3)"}
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="12" y1="19" x2="12" y2="5" />
-                      <polyline points="5 12 12 5 19 12" />
-                    </svg>
-                  </button>
-                </div>
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Open Dashboard
+                </a>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
