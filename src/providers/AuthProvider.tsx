@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -12,6 +13,16 @@ import bs58 from "bs58";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const TOKEN_KEY = "moltghost_jwt";
+
+/** Decode JWT payload and check if it's still valid (not expired). */
+function isTokenValid(jwt: string): boolean {
+  try {
+    const payload = JSON.parse(atob(jwt.split(".")[1]));
+    return typeof payload.exp === "number" && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
 
 interface AuthContextValue {
   ready: boolean;
@@ -35,23 +46,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
   const [token, setToken] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const wasConnected = useRef(false);
 
-  // Restore token from sessionStorage on mount
+  // Restore token from localStorage on mount (discard if expired)
   useEffect(() => {
-    const stored = sessionStorage.getItem(TOKEN_KEY);
-    if (stored) setToken(stored);
+    const stored = localStorage.getItem(TOKEN_KEY);
+    if (stored && isTokenValid(stored)) {
+      setToken(stored);
+    } else if (stored) {
+      localStorage.removeItem(TOKEN_KEY);
+    }
     setReady(true);
   }, []);
 
-  // Clear token when wallet disconnects
+  // Track connection state — only clear token on real disconnect (true → false)
   useEffect(() => {
-    if (!connected) {
+    if (connected) {
+      wasConnected.current = true;
+    } else if (wasConnected.current) {
+      // Wallet was connected and now disconnected
+      wasConnected.current = false;
       setToken(null);
-      sessionStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(TOKEN_KEY);
     }
   }, [connected]);
 
   const login = useCallback(async () => {
+    // Skip if already authenticated with a valid token
+    if (token && isTokenValid(token)) return;
+
     if (!publicKey || !signMessage) {
       throw new Error("Wallet not connected or does not support signing");
     }
@@ -82,12 +105,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // 4. Store token
     setToken(jwt);
-    sessionStorage.setItem(TOKEN_KEY, jwt);
-  }, [publicKey, signMessage]);
+    localStorage.setItem(TOKEN_KEY, jwt);
+  }, [publicKey, signMessage, token]);
 
   const logout = useCallback(() => {
     setToken(null);
-    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     disconnect().catch(() => {});
   }, [disconnect]);
 
